@@ -13,6 +13,7 @@ class Discrete_Doucet_system:
 
     def update(self, xdat, pdat):
         """
+        Update the xdat by xdat + f(xdat).  Also reports the log of the likelihood
 
         :param xdat: np array of current values
         :param pdat: np array of likelihoods now
@@ -32,6 +33,7 @@ class Discrete_Doucet_system:
 
     def initialize(self, Nx, init):
         """
+        Initizalizes fxs
 
         :param Nx : integer indicating the number of samples
         :return: x0
@@ -43,15 +45,17 @@ class Discrete_Doucet_system:
 
     def fval(self, xdat):
         """
+        Computes f(xdat)
 
-        :rtype : matrix
+        :returns:
         """
         fvalue = np.matrix([[self.theta[0]]*len(xdat), self.theta[1]*xdat, self.theta[2]* \
                             (xdat / (1. + np.power(xdat, 2)) ), self.theta[3]*np.cos(self.theta[4]*xdat)])
         return  fvalue
 
-    def jacob(self, xdat, sine = True):
+    def jacob(self, xdat, sine = False):
         """
+        Computes the Jacobian del f del x for the system
 
         :param xdat:
         :param sine: boolean of whether I include since function
@@ -65,13 +69,27 @@ class Discrete_Doucet_system:
                      np.cos(self.theta[4]*xdat)])
         return jacobian
 
+    def compare(self, xdat, xobs):
 
+
+        Nx_obs = len(xobs)
+        Nx_dat = len(xdat)
+        xdatmat = np.matrix([list(xdat)] * Nx_obs)
+        xobsmat = np.matrix([list(xobs)] * Nx_dat)
+        diff = np.abs(xdatmat -np.transpose(xobsmat))
+        diffsqr = np.power(diff, 2)
+
+        #THIS is being done to increase the precision of the exponentiation
+        pyx = np.exp(-(diffsqr  - np.transpose(np.matrix([[np.min(row) for row in diffsqr]]*Nx_dat))))
+        pyxm = np.matrix([row/np.sum(row) for row in pyx.tolist()])
+        px_new = np.array(np.sum(pyxm, 0))[0]
+        px_new = px_new / sum(px_new)
+
+        return px_new
 
 class Simulate:
 
     dflt_tend = 40
-    dflt_Nx = 1000
-    dflt_Ny = 1000
     dflt_init = -1.5
 
     def __init__(self, init = dflt_init, T = dflt_tend):
@@ -80,19 +98,41 @@ class Simulate:
         self.tend = T
         self.init = init
 
-    def simulate(self, dsystem):
+    def simulate(self, dsystem,Nx, Px = np.array([]), stat=False):
         """
+
+        :param stat: Boolean. True if we want to return A and B
         :param Nx: number of samples to simulate
         :param dsystem: the Discrete_Doucet_system
         :return:
         """
-
         assert isinstance(dsystem,Discrete_Doucet_system)
         xdat, pdat = dsystem.initialize(Nx, self.init)
-        for t in range(0,self.tend):
-            xdat, pdat = dsystem.update(xdat, pdat)
 
-        return xdat, pdat
+        if len(Px) != Nx:
+            Px = np.array([1.] * Nx)
+
+        if stat:
+            R = len(dsystem.theta) -1
+            A = np.matrix(np.zeros([R,R]))
+            Adash = np.zeros([Nx, R,R])
+            Adashdash=  np.zeros([R,R])
+            B = np.zeros([1,R])
+            for t in range(0,self.tend):
+                fhi = dsystem.jacob(xdat)
+                A = A + dsystem.jacob(xdat) * np.transpose(dsystem.jacob(xdat))
+                xdat, pdat = dsystem.update(xdat, pdat)
+                B = B + (np.array(fhi) * np.array(xdat)).sum(axis = 1)
+
+            return xdat, pdat, A,B
+
+
+        else:
+            for t in range(0,self.tend):
+                xdat, pdat = dsystem.update(xdat, pdat)
+            return xdat, pdat
+
+
 
     def moment_history(self, dsystem,  powers, Nx):
 
