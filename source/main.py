@@ -1,40 +1,11 @@
-__author__ = 'markov'
-
-
-import numpy as np
-import scipy as sp
-from matplotlib import pyplot as plt
-import sys
-sys.path.append("/Users/markov/Dropbox/Research/OnGoing_Research/Snapshot/Python_experiment/source")
-import Discrete_Doucet_system
-reload(Discrete_Doucet_system)
-
-
-dsystem = Discrete_Doucet_system.Discrete_Doucet_system()
-dsystem.theta, dsystem.sigma
-
-
-init = -1.5
-Nx = 3000
-
-x0 = np.array([init]*Nx )
-x0 = np.random.normal(init,  np.sqrt(5) , Nx)
-
-
-T = 12
-xnow = x0
-pnow = np.power(x0 - init,2)
-xmean = np.array([0.]*(T+1))
-xmean[0] = np.mean(x0)
-
-for t  in range(1,T+1,1):
-    xnow, pnow = dsystem.update(xnow, pnow)
-    xmean[t] = np.mean(xnow)
-
-simul  = Discrete_Doucet_system.Simulate(Nx = 3000, T = 12)
-powers = [1,2,3]
-mmts = simul.moment_history(dsystem, powers)
-mmts.shape
-
-plt.subplot(1,2,0)
-xplot= plt.hist(xnow,bins=50, normed=True)
+alpha = 0.5
+theta_approx = np.array([-1.5, 0, 0, 0.1, 0.2])
+for iter in range(0,100):
+        print theta_approx
+        dsystem_old = Discrete_Doucet_system.Discrete_Doucet_system(theta = theta_approx)
+        xdat_test, pdat_test= simul.simulate(dsystem_old, Nx_test,  seed = iter*2)
+        px = Nx_test * dsystem.compare(xdat_old, xobs)
+        xdat_new, pdat_new, A_new, B_new = simul.simulate(dsystem_old, Nx_test,  seed = iter*2, Px = px, stat= True)
+        xdat_old, pdat_old, A_old, B_old = simul.simulate(dsystem_old, Nx_test,  seed = iter*2+1, stat= True)
+        theta_approx = np.array(np.linalg.inv(A_new + alpha*A_old) * np.matrix(B_new + alpha*B_old).transpose())
+        theta_approx = np.array(theta_approx.transpose().tolist()[0] + [0.2])
