@@ -1,6 +1,6 @@
 import numpy as np
-
 __author__ = 'markov'
+from timeit import default_timer as timer
 
 
 class Discrete_Doucet_system:
@@ -105,7 +105,7 @@ class Simulate:
         :param dsystem: the Discrete_Doucet_system
         :return:
         """
-        assert isinstance(dsystem, Discrete_Doucet_system)
+        #assert isinstance(dsystem, Discrete_Doucet_system)
         np.random.seed(seed)
         xdat, pdat = dsystem.initialize(Nx, self.init)
 
@@ -132,8 +132,8 @@ class Simulate:
 
     def moment_history(self, dsystem, powers, Nx):
 
-        assert isinstance(dsystem, Discrete_Doucet_system)
-        assert isinstance(Nx, int)
+        #assert isinstance(dsystem, Discrete_Doucet_system)
+        #assert isinstance(Nx, int)
         xdat, pdat = dsystem.initialize(Nx, self.init)
         mmt_history = np.zeros([self.tend + 1, len(powers)])
 

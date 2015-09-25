@@ -1,7 +1,8 @@
 
 import numpy as np
 import scipy as sp
-from matplotlib import pyplot as plt
+from datetime import datetime
+from timeit import default_timer as timer
 import sys
 import pickle
 sys.path.append("../source")
@@ -19,8 +20,14 @@ class DM_test:
                 self.theta_init = theta_init
 
 
-        def run(self, n_iter):
+        def run(self, n_iter, write = False):
 
+
+
+            d = datetime.now()
+            timenow = str(d.year) + "_" + str(d.month) + str(d.day) + "_" + str(d.hour) + str(d.minute)
+            stdout_filename = "../records/transition" + timenow + ".txt"
+            history_filename = "../records/thetahistory" +  timenow + ".p"
             T0 = self.tend
             dsystem = dd.Discrete_Doucet_system()
             simul  = dd.Simulate(T = T0)
@@ -30,7 +37,12 @@ class DM_test:
             theta_history = np.zeros([n_iter+1, len(self.theta_init)])
             theta_history[0] = self.theta_init
             theta_approx = self.theta_init
-            sys.stdout = open('transition.txt', 'w')
+            if write:
+                sys.stdout = open(stdout_filename, 'w')
+
+            print "terminal time is " + str(self.tend)
+            print "initial theta is: ", self.theta_init
+            start_time = timer()
             for iter in range(1,n_iter+1):
                 print "iteration " + str(iter) + ":" , theta_approx
                 dsystem_old = dd.Discrete_Doucet_system(theta = theta_approx)
@@ -41,4 +53,6 @@ class DM_test:
                 theta_approx = np.array(np.linalg.inv(A_new + self.alpha*A_old) * np.matrix(B_new + self.alpha*B_old).transpose())
                 theta_approx = np.array(theta_approx.transpose().tolist()[0] + [0.2])
                 theta_history[iter] = theta_approx
-            pickle.dump(theta_history, open("thetahistory.p", "wb"))
+            end_time = timer()
+            print "elapsed time : "+ str(end_time - start_time)
+            pickle.dump(theta_history, open(history_filename, "wb"))
