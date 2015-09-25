@@ -42,6 +42,9 @@ class DM_test:
 
             print "terminal time is " + str(self.tend)
             print "initial theta is: ", self.theta_init
+            print "Nx test is:", str(self.nx_test)
+            print "Nx observed is:", str(self.nx_obs)
+            print "Alpha is :", str(self.alpha)
             start_time = timer()
             for iter in range(1,n_iter+1):
                 print "iteration " + str(iter) + ":" , theta_approx
