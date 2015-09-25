@@ -1,0 +1,7 @@
+terminal time is 15
+initial theta is:  [-1.5  0.   0.   0.1  0.2]
+Nx test is: 20000
+Nx observed is: 1000
+Alpha is : 0.1
+iteration 1: [-1.5  0.   0.   0.1  0.2]
+iteration 2: [-1.4631112   0.00708625  0.84099587  0.08242697  0.2       ]
