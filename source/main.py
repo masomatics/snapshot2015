@@ -32,9 +32,9 @@ class DM_test:
             dsystem = dd.Discrete_Doucet_system()
             simul  = dd.Simulate(T = T0)
 
-            ##THIS PLACE WILL BE REPLACED WITH sets of SNAPSHOTS
+            ##THIS PLACE WILL BE REPLACED WITH sets of actual SNAPSHOTS
+            np.random.seed(0)
             snap0 = np.random.normal(-1.5, np.sqrt(5), self.nx_obs)
-
             xobs,pobs = simul.simulate(dsystem, Nx = self.nx_obs, init_snap = snap0)
 
             theta_history = np.zeros([n_iter+1, len(self.theta_init)])
@@ -59,6 +59,9 @@ class DM_test:
                 theta_approx = np.array(np.linalg.inv(A_new + self.alpha*A_old) * np.matrix(B_new + self.alpha*B_old).transpose())
                 theta_approx = np.array(theta_approx.transpose().tolist()[0] + [0.2])
                 theta_history[iter] = theta_approx
+                theta_approx[1] = np.sign(theta_approx[1]) *  np.min([np.abs(theta_approx[1]), 0.99999])
             end_time = timer()
             print "elapsed time : "+ str(end_time - start_time)
             pickle.dump(theta_history, open(history_filename, "wb"))
+
+
