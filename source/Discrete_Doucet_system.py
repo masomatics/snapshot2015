@@ -90,7 +90,7 @@ class Simulate:
     dflt_tend = 40
     dflt_init = -1.5
 
-    def __init__(self, init=dflt_init, T=dflt_tend):
+    def __init__(self,  T=dflt_tend):
         # self.Nx = Nx
         # self.Ny = Ny
         self.tend = T
@@ -104,6 +104,9 @@ class Simulate:
         :return:
         """
         #assert isinstance(dsystem, Discrete_Doucet_system)
+
+        #SHOULD I initialize here??? This leaves me a eerie feeling.
+        #MIGHT REQUIRE very annoying refactoring...
         np.random.seed(seed)
         xdat,pdat = dsystem.initialize(Nx, init_snap)
 
