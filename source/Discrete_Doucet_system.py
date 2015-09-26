@@ -31,16 +31,15 @@ class Discrete_Doucet_system:
 
         return np.array(xdat_new)[0], pdat
 
-    def initialize(self, Nx, init):
+    def initialize(self, nx, init_snap):
         """
         Initizalizes fxs
 
         :param Nx : integer indicating the number of samples
         :return: x0
         """
-        init_noise = np.random.normal(0, self.sigma[1], Nx)
-        x0 = init + init_noise
-        p0 = np.log(np.power(init_noise, 2.))
+        x0 = np.random.choice(init_snap, nx)
+        p0 = np.zeros([1, nx])
         return x0, p0
 
     def fval(self, xdat):
@@ -95,9 +94,8 @@ class Simulate:
         # self.Nx = Nx
         # self.Ny = Ny
         self.tend = T
-        self.init = init
 
-    def simulate(self, dsystem, Nx, seed=1, Px=np.array([]), stat=False):
+    def simulate(self, dsystem, Nx, init_snap, seed=1, Px=np.array([]), stat=False):
         """
 
         :param stat: Boolean. True if we want to return A and B
@@ -107,7 +105,7 @@ class Simulate:
         """
         #assert isinstance(dsystem, Discrete_Doucet_system)
         np.random.seed(seed)
-        xdat, pdat = dsystem.initialize(Nx, self.init)
+        xdat,pdat = dsystem.initialize(Nx, init_snap)
 
         if len(Px) != Nx:
             Px = np.array([1.] * Nx)
