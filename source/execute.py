@@ -1,6 +1,6 @@
 import numpy as np
-import  main
-reload(main)
+import  Numerical_test1
+reload(Numerical_test1)
 from timeit import default_timer as timer
 
 
@@ -12,7 +12,7 @@ alpha0 = 0.01
 t_end = 12
 n_iter = 4000
 
-test_seq = main.DM_test(Nx_obs = nxobs, Nx_test = nxtest, alpha =alpha0, tend = t_end, theta_init= theta_approx0)
+test_seq = Numerical_test1.DM_test(Nx_obs=nxobs, Nx_test=nxtest, alpha =alpha0, tend =t_end, theta_init= theta_approx0)
 
 
 test_seq.run(n_iter,write = True)

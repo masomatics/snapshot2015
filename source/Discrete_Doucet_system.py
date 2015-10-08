@@ -31,23 +31,40 @@ class Discrete_Doucet_system:
 
         return np.array(xdat_new)[0], pdat
 
-    def initialize(self, Nx, init):
+    def initialize(self, Nx, init, seed =1):
         """
-        Initizalizes fxs
+        Initizalizes the distribution at normal centered at init
 
         :param Nx : integer indicating the number of samples
         :return: x0
         """
+        np.random.seed(seed)
         init_noise = np.random.normal(0, self.sigma[1], Nx)
         x0 = init + init_noise
         p0 = np.log(np.power(init_noise, 2.))
         return x0, p0
 
+    def initialize2(self, Nx, init_snap, seed = 1, continuous= False):
+
+        #This initialize is different from the original in that it takes in the distribution
+        np.random.seed(seed)
+
+        x0 = np.random.choice(init_snap, Nx)
+        p0 = np.zeros([1, Nx])
+
+        if continuous:
+            noise = np.random.normal(0., self.sigma[1], Nx)
+
+        x0 = x0 + noise
+
+        return x0, p0
+
+
     def fval(self, xdat):
         """
-        Computes f(xdat)
+        Computes f(xdat), the update value
 
-        :returns:
+        :returns: f(xdat)
         """
         fvalue = np.matrix([[self.theta[0]] * len(xdat), self.theta[1] * xdat, self.theta[2] * \
                             (xdat / (1. + np.power(xdat, 2))), self.theta[3] * np.cos(self.theta[4] * xdat)])
@@ -86,7 +103,57 @@ class Discrete_Doucet_system:
 
         return px_new
 
+    def simulate(self, Nx, init_xdat, tend, seed =2, Px=np.array([]), stat = False):
+        """
+        This version of the fxn simulate allows arbitrary distributional input.
+        For the generation of mock-obs data, call this function multiple times.
 
+        :param stat: Boolean. True if we want to return A and B
+        :param Nx: number of samples to simulate
+        :return:
+        matrix A, B  (refer to the equation in the article)
+        ndarray pdat(likelihood), xdat(terminal value)
+        """
+        np.random.seed(seed)
+
+        xdat = init_xdat
+        pdat = np.zeros([1, Nx])
+
+
+        if len(Px) != Nx:
+            Px = np.array([1.] * Nx)
+
+        if stat:
+            R = len(self.theta) - 1
+            A = np.matrix(np.zeros([R, R]))
+            B = np.zeros([1, R])
+            for t in range(0, tend):
+                fhi = self.jacob(xdat)
+                A = A + np.matrix(np.array(self.jacob(xdat)) * Px) * np.transpose(self.jacob(xdat))
+                xdat, pdat = self.update(xdat, pdat)
+                B = B + (np.array(fhi) * np.array(xdat) * Px).sum(axis=1)
+
+            return xdat, pdat, A, B
+
+        else:
+            for t in range(0, tend):
+                xdat, pdat = self.update(xdat, pdat)
+            return xdat, pdat
+
+    def make_snapshots(self, nxs, times, init_snap):
+        """
+        :param nxs:  lists of the size of observed datapoints.
+        :param times:   lists of times at which the snapshots were taken
+        :param init_snap:  The initial snapshot. Default is Gauss around -1.5
+        :return:  Tuple Snapshots. THe sets of  (time,  nx)
+        """
+        snapshots={}
+        for k in range(0, len(times)):
+            xdat0, pdat0 = self.initialize2(nxs[k], init_snap, continuous=True)
+            snapshots[times[k]], pdatX = self.simulate(nxs[k], xdat0, tend=times[k])
+        return snapshots
+
+#This class must be refactored.
 class Simulate:
     dflt_tend = 40
     dflt_init = -1.5
@@ -99,7 +166,6 @@ class Simulate:
 
     def simulate(self, dsystem, Nx, seed=1, Px=np.array([]), stat=False):
         """
-
         :param stat: Boolean. True if we want to return A and B
         :param Nx: number of samples to simulate
         :param dsystem: the Discrete_Doucet_system
@@ -112,6 +178,8 @@ class Simulate:
         if len(Px) != Nx:
             Px = np.array([1.] * Nx)
 
+        np.random.seed(seed +1)
+
         if stat:
             R = len(dsystem.theta) - 1
             A = np.matrix(np.zeros([R, R]))
@@ -123,7 +191,6 @@ class Simulate:
                 B = B + (np.array(fhi) * np.array(xdat) * Px).sum(axis=1)
 
             return xdat, pdat, A, B
-
 
         else:
             for t in range(0, self.tend):
