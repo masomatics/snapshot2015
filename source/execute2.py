@@ -14,7 +14,7 @@ nxtest = 20000
 alpha0 = 0.01
 t_end = 20
 n_iter = 10
-Nx = 1000
+Nx = 500
 
 
 
@@ -25,7 +25,7 @@ snapshots= dsystem.make_snapshots(nxs, times, np.array([-1.5]))
 theta_init = np.array([-1.5, 0, 0, 0.1, 0.2])
 
 
-test_seq = nt.DM_test(Nx_obs=nxobs, Nx_test=nxtest, alpha =alpha0, tend =t_end, theta_init= theta_init)
+test_seq = nt.DM_test(alpha =alpha0, tend =t_end, theta_init= theta_init)
 
 
 test_seq.run_multiple_snaps(n_iter, Nx, snapshots, theta_init, write = False)

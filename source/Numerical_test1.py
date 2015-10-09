@@ -12,28 +12,27 @@ reload(dd)
 
 class DM_test:
 
-        def __init__(self, Nx_obs, Nx_test, alpha, tend, theta_init):
-                self.nx_obs = Nx_obs
-                self.nx_test = Nx_test
+        def __init__(self,  alpha, tend, theta_init):
+
                 self.alpha = alpha
                 self.tend = tend
                 self.theta_init = theta_init
 
-        def run(self, n_iter, write = False):
+        def run(self, n_iter, nx_obs, nx_test, write=False):
 
 
             #Recording the current time
             d = datetime.now()
             timenow = str(d.year) + "_" + str(d.month) + str(d.day) + "_" + str(d.hour) + str(d.minute)
             stdout_filename = "../records/transition" + timenow + ".txt"
-            history_filename = "../records/thetahistory" +  timenow + ".p"
+            history_filename = "../records/thetahistory" + timenow + ".p"
 
 
             #Terminal time, system, simulation
             T0 = self.tend
             dsystem = dd.Discrete_Doucet_system()
             simul  = dd.Simulate(T = T0)
-            xobs,pobs = simul.simulate(dsystem, Nx = self.nx_obs)
+            xobs,pobs = simul.simulate(dsystem, Nx=nx_obs)
 
             #Dirichlet parameters
             alpha = self.alpha
@@ -45,8 +44,8 @@ class DM_test:
 
             print "terminal time is " + str(self.tend)
             print "initial theta is: ", self.theta_init
-            print "Nx test is:", str(self.nx_test)
-            print "Nx observed is:", str(self.nx_obs)
+            print "Nx test is:", str(nx_test)
+            print "Nx observed is:", str(nx_obs)
             print "Alpha is :", str(self.alpha)
 
             #Run the simulation
@@ -54,10 +53,10 @@ class DM_test:
             for iter in range(1,n_iter+1):
                 print "iteration " + str(iter) + ":" , theta_approx
                 dsystem_old = dd.Discrete_Doucet_system(theta = theta_approx)
-                xdat_test, pdat_test= simul.simulate(dsystem_old, Nx = self.nx_test,  seed = iter*2)
-                px = self.nx_test * dsystem.compare(xdat_test, xobs)
-                xdat_new, pdat_new, A_new, B_new = simul.simulate(dsystem_old, Nx = self.nx_test,  seed = iter*2, Px = px, stat= True)
-                xdat_old, pdat_old, A_old, B_old = simul.simulate(dsystem_old, Nx = self.nx_test,  seed = iter*2+1, stat= True)
+                xdat_test, pdat_test= simul.simulate(dsystem_old, Nx = nx_test,  seed = iter*2)
+                px = nx_test * dsystem.compare(xdat_test, xobs)
+                xdat_new, pdat_new, A_new, B_new = simul.simulate(dsystem_old, Nx = nx_test,  seed = iter*2, Px = px, stat= True)
+                xdat_old, pdat_old, A_old, B_old = simul.simulate(dsystem_old, Nx = nx_test,  seed = iter*2+1, stat= True)
                 theta_approx = np.array(np.linalg.inv(A_new + self.alpha*A_old) * np.matrix(B_new + self.alpha*B_old).transpose())
                 theta_approx = np.array(theta_approx.transpose().tolist()[0] + [0.2])
                 theta_history[iter] = theta_approx
@@ -87,10 +86,12 @@ class DM_test:
             if write:
                 sys.stdout = open(stdout_filename, 'w')
 
-            print "terminal time is " + str(self.tend)
+            times = [key for key in snapshots]
+            nxs = [snap.shape[0] for time, snap in snapshots.iteritems()]
+            print "snaptimes are " + str(times)
             print "initial theta is: ", self.theta_init
-            print "Nx test is:", str(self.nx_test)
-            print "Nx observed is:", str(self.nx_obs)
+            print "Nx test is:", str(Nx)
+            print "Nx observed are:", str(nxs)
             print "Alpha is :", str(self.alpha)
 
             times = [key for key in snapshots]

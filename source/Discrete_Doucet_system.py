@@ -153,6 +153,19 @@ class Discrete_Doucet_system:
             snapshots[times[k]], pdatX = self.simulate(nxs[k], xdat0, tend=times[k])
         return snapshots
 
+    def moment_history(self, powers, Nx, xdat_init, tend):
+
+        #assert isinstance(dsystem, Discrete_Doucet_system)
+        #assert isinstance(Nx, int)
+        xdat, pdat = self.initialize2(Nx, xdat_init, continuous = True)
+        mmt_history = np.zeros([tend + 1, len(powers)])
+
+        for t in range(0, tend + 1):
+            mmt_history[t] = np.array([np.mean(np.power(xdat, exponent)) for exponent in powers])
+            xdat, pdat = self.update(xdat, pdat)
+
+        return np.transpose(mmt_history)
+
 #This class must be refactored.
 class Simulate:
     dflt_tend = 40
