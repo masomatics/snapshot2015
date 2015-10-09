@@ -86,7 +86,7 @@ class DM_test:
             if write:
                 sys.stdout = open(stdout_filename, 'w')
 
-            times = [key for key in snapshots]
+            times = np.sort(np.array([key for key in snapshots]))
             nxs = [snap.shape[0] for time, snap in snapshots.iteritems()]
             print "snaptimes are " + str(times)
             print "initial theta is: ", self.theta_init
@@ -94,7 +94,6 @@ class DM_test:
             print "Nx observed are:", str(nxs)
             print "Alpha is :", str(self.alpha)
 
-            times = [key for key in snapshots]
             numslice = len(times)
             for iter in range(0, n_iter):
 
