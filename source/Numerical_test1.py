@@ -12,10 +12,9 @@ reload(dd)
 
 class DM_test:
 
-        def __init__(self,  alpha, tend, theta_init):
+        def __init__(self,  alpha, theta_init):
 
                 self.alpha = alpha
-                self.tend = tend
                 self.theta_init = theta_init
 
         def run(self, n_iter, nx_obs, nx_test, write=False):
@@ -106,8 +105,14 @@ class DM_test:
 
                 for k in range(0, numslice-1):
 
+
+
                     time_old=times[k]
                     time_new=times[k+1]  # Get this from iteritem
+
+                    #time_old, time_new = np.sort(np.random.choice(times,2, replace=False))
+
+                    #print time_old, time_new
 
                     snap_old = snapshots[time_old]
                     snap_new = snapshots[time_new]
