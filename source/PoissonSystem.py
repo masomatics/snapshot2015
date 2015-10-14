@@ -100,22 +100,25 @@ class PoissonSystem:
 
         return xnew, tnew
 
-    def run_Euler(self, xinit, tend, deltat, tinit = 0,record = False, recordtime =[]):
+    def run_Euler(self, xinit, tend, deltat, tinit=0, record=False, recordtime=[]):
 
 
         numerical_precision = 0.000000001
+        numspecies = xinit.shape[1]
+        numsamples = xinit.shape[0]
         xnow = xinit
         tnow = tinit
         record_idx = 0
         if(len(recordtime) == 0):
             recordtime =  np.linspace(tinit, tend, np.int((tend-tinit)/deltat) + 1)
         nextmark = recordtime[record_idx]
-        record_dat = [None] * len(recordtime)
+        #record_dat = [None] * len(recordtime)
+        record_dat = np.zeros([recordtime.shape[0], numsamples, numspecies])
 
         while tnow < (tend + numerical_precision):
             if np.abs(nextmark - tnow) < numerical_precision and record == True:
-                record_dat[record_idx] = [[recordtime[record_idx], xnow]]
-                print tnow
+                #record_dat[record_idx] = [recordtime[record_idx], xnow]
+                record_dat[record_idx, :, :] = xnow
                 if record_idx < len(recordtime) -1:
                     record_idx += 1
                     nextmark = recordtime[record_idx]
@@ -125,7 +128,7 @@ class PoissonSystem:
             xnow, tnow = self.update_Euler(xnow, tnow, deltat_now)
 
         if record:
-            return xnow, record_dat
+            return xnow, recordtime, record_dat
         else:
             return xnow
 
