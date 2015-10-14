@@ -43,9 +43,9 @@ class PoissonSystem:
         '''
         nsample = len(xnow.tolist())
         rates = self.rate(np.asarray(xnow))
-        ratesum = [np.sum(rates[k]) for k in range(0, nsample)]
-        probability = [rates[k]/ratesum[k] for k in range(0, nsample)]
-        deltat = np.array([-np.log(np.random.uniform(0.0, 1.0, 1))/ratesum[k] for k in range(0, nsample)])
+        ratesum = np.sum(rates, axis=1)
+        probability = rates/ratesum.reshape(nsample, 1)
+        deltat = -np.array(np.log(np.random.uniform(0.0, 1.0, 1)))/ratesum.reshape(nsample, 1)
         choices = range(0, self.numrxn)
         rxn = [np.random.choice(choices, 1, p=probability[k]) for k in range(0, nsample)]
         xnew = xnow + np.squeeze(np.array(self.rxn_matrix[rxn, :]))
@@ -54,22 +54,37 @@ class PoissonSystem:
         return xnew, tnew
 
 
-    def run_Gillespie(self, xinit, tend, tinit= 0, record = False):
+    def run_Gillespie(self, xinit, tend, tinit= 0, record = False, maxjumps = 30000):
+        '''
+
+        :param xinit:  np.matrix([[state]])   1 sample ONLY!
+        :param tend:
+        :param tinit:
+        :param record:
+        :return:
+        '''
 
         numerical_precision = 0.000000001
-        maxjumps = 10000
         xnow = xinit
         tnow = tinit
+        numspecies = xinit.shape[1]
+        numsamples = xinit.shape[0]
+
         if record:
-            record_dat = [None] * maxjumps
+            record_dat = np.zeros([maxjumps, numspecies])
+            time_dat = np.zeros(maxjumps)
+            record_dat[0, :] = xinit
+            time_dat[0] = 0
         jump_idx = 0
         while(tnow < tend and jump_idx < maxjumps):
             xnow, tnow = self.update_Gillespie(xnow, tnow)
             jump_idx +=1
             if record:
-                record_dat = record_dat + [xnow, tnow]
+                #print [np.squeeze(np.asarray(xnow)[0]).tolist(), np.squeeze(tnow).tolist()]
+                record_dat[jump_idx, :] = np.squeeze(np.asarray(xnow)[0]).tolist()
+                time_dat[jump_idx] = tnow
         if record:
-            return xnow, record_dat
+            return xnow, record_dat[range(0, jump_idx)], time_dat[range(0,jump_idx)]
         else:
             return xnow
 
