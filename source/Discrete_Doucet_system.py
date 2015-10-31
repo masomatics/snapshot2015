@@ -44,18 +44,21 @@ class Discrete_Doucet_system:
         p0 = np.log(np.power(init_noise, 2.))
         return x0, p0
 
-    def initialize2(self, Nx, init_snap, seed = 1, continuous= False):
+    def initialize2(self, Nx, init_snap, seed = 1, continuous= False, prob = []):
 
         #This initialize is different from the original in that it takes in the distribution
         np.random.seed(seed)
 
-        x0 = np.random.choice(init_snap, Nx)
+        if len(prob) == 0 :
+            x0 = np.random.choice(init_snap, Nx)
+        else:
+            x0 = np.random.choice(init_snap, Nx, p = prob)
+
         p0 = np.zeros([1, Nx])
 
         if continuous:
             noise = np.random.normal(0., self.sigma[1], Nx)
-
-        x0 = x0 + noise
+            x0 = x0 + noise
 
         return x0, p0
 
