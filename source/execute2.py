@@ -12,7 +12,7 @@ reload(nt)
 nxobs = 1000
 nxtest = 20000
 t_end = 20
-n_iter = 1500
+n_iter = 500
 Nx = 500
 
 
@@ -65,5 +65,5 @@ theta_init[4] = 0.2
 test_seq = nt.DM_test(alpha =alpha0, theta_init= theta_init)
 
 
-test_seq.run_multiple_snaps(n_iter, Nx, snapshots, theta_init, write=True)
+test_seq.run_multiple_snaps(n_iter, Nx, snapshots, theta_init, write=False)
 

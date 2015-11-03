@@ -18,9 +18,12 @@ class PoissonSystem:
                   [[-1., 0., 0.], [[0., 1.]], 0.1],
                   [[0., -1., 0.], [[1., 1.]], 1.]]
 
-    def __init__(self, theta_rxn_vec_pairs=dflt_param):
+    dflt_sigma = np.array([0.5, 5, 7])
+
+    def __init__(self, theta_rxn_vec_pairs=dflt_param, sigma = dflt_sigma):
         self.param = theta_rxn_vec_pairs
         self.numrxn = len(self.param)
+        self.sigma = sigma
 
         pre_rxnmatrix = np.matrix(np.zeros([len(self.param), len(self.param[0][0])]))
         pre_theta = np.zeros(self.numrxn)
@@ -88,7 +91,7 @@ class PoissonSystem:
         else:
             return xnow
 
-    def update_Euler(self, xdat, tnow, deltat):
+    def update_Euler(self, xdat, tnow, deltat, record = False):
 
         #nsample = len(xnow.tolist())
         intensity = self.rate(np.asarray(xdat))
@@ -98,10 +101,25 @@ class PoissonSystem:
         xnew = xdat + deltax
         tnew = tnow + deltat
 
-        return xnew, tnew
+        if record:
+            return xnew, tnew, rxn_cnt, rates/self.theta
+        else:
+            return xnew, tnew
 
-    def run_Euler(self, xinit, tend, deltat, tinit=0, record=False, recordtime=[]):
+    def run_Euler(self, xinit, tend, deltat, tinit=0, seed = 2, record=False, recordtime=[]):
 
+        '''
+
+        :param xinit:
+        :param tend:
+        :param deltat:
+        :param tinit:
+        :param record:
+        :param recordtime:
+        :return:
+        '''
+
+        np.random.seed(seed)
 
         numerical_precision = 0.000000001
         numspecies = xinit.shape[1]
@@ -113,9 +131,14 @@ class PoissonSystem:
             recordtime =  np.linspace(tinit, tend, np.int((tend-tinit)/deltat) + 1)
         nextmark = recordtime[record_idx]
         #record_dat = [None] * len(recordtime)
-        record_dat = np.zeros([recordtime.shape[0], numsamples, numspecies])
+        if record:
+            record_dat = np.zeros([recordtime.shape[0], numsamples, numspecies])
 
-        while tnow < (tend + numerical_precision):
+
+        param_record_dat = np.zeros([numsamples, self.numrxn])
+        internal_integral = np.zeros([numsamples, self.numrxn])
+
+        while tend >tinit and tnow < (tend + numerical_precision):
             if np.abs(nextmark - tnow) < numerical_precision and record == True:
                 #record_dat[record_idx] = [recordtime[record_idx], xnow]
                 record_dat[record_idx, :, :] = xnow
@@ -125,12 +148,15 @@ class PoissonSystem:
             deltat_now = deltat + 0
             if tnow + deltat > nextmark and tnow < nextmark:
                 deltat_now = nextmark - tnow
-            xnow, tnow = self.update_Euler(xnow, tnow, deltat_now)
+            xnow, tnow, record_rxn, rates_paramless = self.update_Euler(xnow, tnow, deltat_now, record = True)
+            param_record_dat = param_record_dat + record_rxn
+            internal_integral = internal_integral + rates_paramless
+
 
         if record:
             return xnow, recordtime, record_dat
         else:
-            return xnow
+            return xnow, param_record_dat, internal_integral
 
     def rate(self, xdat):
         '''
@@ -145,3 +171,36 @@ class PoissonSystem:
             rate[:, k] = self.theta[k]*np.power(xdat[:, self.reactant[k][0]], self.reactant[k][1])
 
         return rate
+
+    def make_snapshots(self, snaptimes, init_snaps, observed, euler= True, delta = 0.01, default = True, nx = 1000, seed = 2):
+        '''
+
+        :param snaptimes: times from which to sample
+        :param init_snap: list of initial distribution
+        :param observed:  observed dimensions
+        :param euler:     if true, euler tauleap
+        :param delta:     delta of euler tauleap
+        :param default:   if true, create init_snaps automatically
+        :param nx:        if default is true, the size of the init_snaps to be made automatically
+        :return:   dict snapshots{time, [obsv_index, dataset]}
+        '''
+        snapshots = {}
+
+
+        for index in range(0, len(snaptimes)):
+            if default:
+                xdatinit = np.array([init_snaps[0]]*nx)
+            else:
+                xdatinit = init_snaps[index]
+            if euler:
+                xdat, rec, integral = self.run_Euler(xdatinit, snaptimes[index], delta, seed = seed)
+            else:
+                print "Gillespie version is under construction."
+                pass
+            snapshots[snaptimes[index]] = [None]*2
+            for obsv_index in range(0, len(observed)):
+                snapshots[snaptimes[index]][obsv_index]= [observed[obsv_index],  xdat[:,observed[obsv_index]]]
+
+        return snapshots
+
+
