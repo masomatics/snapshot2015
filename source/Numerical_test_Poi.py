@@ -6,7 +6,7 @@ import sys
 import pickle
 from datetime import datetime
 
-smallnumber = 1e-9
+smallnumber = 1e-6
 
 class Numerical_test_Poi(Numerical_test):
 
@@ -76,7 +76,9 @@ class Numerical_test_Poi(Numerical_test):
         #print pathdat_numerator.shape, pathdat_numerator
 
         thetanew = pathdat_numerator / pathdat_denominator
+
         thetanew[np.where(thetanew == 0)] = smallnumber
+        thetanew[np.isnan(thetanew)] = smallnumber
 
 
 

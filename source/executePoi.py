@@ -12,16 +12,16 @@ import Numerical_test_Poi as NumtP
 
 
 small_number = 0.1
-n_iter = 1000
+n_iter = 2000
 delta = 0.001
-Nx = 500
+Nx = 1000
 Ny = 1000
 alpha = 0.5
 
 
 psystem = ps.PoissonSystem()
 initsnap = np.array([[0,0,0]] * Nx)
-observed = np.array([[0,1,2]])
+observed = np.array([[0,1],[0,2]])
 snaptimes =np.array([0, 0.5, 1.] )
 snapshots = psystem.make_snapshots(snaptimes, initsnap, observed,  delta = 0.001,  nx = Ny)
 

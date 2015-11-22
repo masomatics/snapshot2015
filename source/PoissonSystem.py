@@ -12,15 +12,15 @@ class PoissonSystem:
 
     parameter convention: [rxnvector, listof[reactant specie idx, order], rate]
     '''
-    dflt_param = [[[1., 0., 0.], [0., 0.]],
-                  [[0., 1., 0.], [0., 1.]],
-                  [[0., -2., 1], [1., 2.]],
-                  [[-1., 0., 0.], [0., 1.]],
-                  [[0., -1., 0.], [1., 1.]]]
+    dflt_param = [[[1., 0., 0.], [[0.], [0.]]],
+                  [[0., 1., 0.], [[0.], [1.]]],
+                  [[0., -2., 1], [[1.], [2.]]],
+                  [[-1., 0., 0.], [[0.], [1.]]],
+                  [[0., -1., 0.], [[1.], [1.]]]]
 
     dflt_theta = np.array([25., 1000., 0.001, 0.1, 1.])
 
-    dflt_sigma = np.array([0.5, 5, 7])
+    dflt_sigma = np.array([0.5, 1, 1])
 
     def __init__(self, theta_rxn_vec_pairs=dflt_param, theta = dflt_theta, sigma = dflt_sigma):
         self.param = theta_rxn_vec_pairs
@@ -174,7 +174,8 @@ class PoissonSystem:
         nsample = len(xdat.tolist())
         rate = np.zeros([nsample, self.numrxn])
         for k in range(0, self.numrxn):
-            rate[:, k] = self.theta[k]*np.power(xdat[:, self.reactant[k][0]], self.reactant[k][1])
+
+            rate[:, k] = np.squeeze(self.theta[k]*np.power(xdat[:, self.reactant[k][0]], self.reactant[k][1]))
 
         rate = np.maximum(rate, 0)
 
