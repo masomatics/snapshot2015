@@ -12,31 +12,33 @@ class PoissonSystem:
 
     parameter convention: [rxnvector, listof[reactant specie idx, order], rate]
     '''
-    dflt_param = [[[1., 0., 0.], [[0., 0.]],  25.],
-                  [[0., 1., 0.], [[0., 1.]],  1000.],
-                  [[0., -2., 1], [[1., 2.]], 0.001],
-                  [[-1., 0., 0.], [[0., 1.]], 0.1],
-                  [[0., -1., 0.], [[1., 1.]], 1.]]
+    dflt_param = [[[1., 0., 0.], [0., 0.]],
+                  [[0., 1., 0.], [0., 1.]],
+                  [[0., -2., 1], [1., 2.]],
+                  [[-1., 0., 0.], [0., 1.]],
+                  [[0., -1., 0.], [1., 1.]]]
+
+    dflt_theta = np.array([25., 1000., 0.001, 0.1, 1.])
 
     dflt_sigma = np.array([0.5, 5, 7])
 
-    def __init__(self, theta_rxn_vec_pairs=dflt_param, sigma = dflt_sigma):
+    def __init__(self, theta_rxn_vec_pairs=dflt_param, theta = dflt_theta, sigma = dflt_sigma):
         self.param = theta_rxn_vec_pairs
         self.numrxn = len(self.param)
         self.sigma = sigma
 
         pre_rxnmatrix = np.matrix(np.zeros([len(self.param), len(self.param[0][0])]))
-        pre_theta = np.zeros(self.numrxn)
+        #pre_theta = np.zeros(self.numrxn)
         reactant_v= []
         product_v =[]
         for k in range(0, self.numrxn):
             pre_rxnmatrix[k, :] = np.matrix(self.param[k][0])
-            reactant_v = reactant_v + self.param[k][1]
+            reactant_v = reactant_v + [self.param[k][1]]
             product_v = product_v + [self.param[k][0]]
-            pre_theta[k] = self.param[k][2]
+            #pre_theta[k] = self.param[k][2]
         self.rxn_matrix = pre_rxnmatrix
         self.product = product_v
-        self.theta = pre_theta
+        self.theta = theta
         self.reactant = reactant_v
 
     def update_Gillespie(self, xnow, tnow):
@@ -96,6 +98,10 @@ class PoissonSystem:
         #nsample = len(xnow.tolist())
         intensity = self.rate(np.asarray(xdat))
         rates = intensity * deltat
+
+        #print rates
+        #if np.sum(rates) > 1000: print np.sum(rates)
+
         rxn_cnt = np.random.poisson(rates)  # nsample x numrxn matrix
         deltax = rxn_cnt * self.rxn_matrix
         xnew = xdat + deltax
@@ -169,6 +175,8 @@ class PoissonSystem:
         rate = np.zeros([nsample, self.numrxn])
         for k in range(0, self.numrxn):
             rate[:, k] = self.theta[k]*np.power(xdat[:, self.reactant[k][0]], self.reactant[k][1])
+
+        rate = np.maximum(rate, 0)
 
         return rate
 

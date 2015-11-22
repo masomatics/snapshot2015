@@ -16,16 +16,29 @@ class Numerical_test:
         self.theta_init = theta_init
 
 
-    def compare(self, xdat, xobs, sigma, observed = [np.array([0])]):
+    def compare(self, xdat, xobs, sigma):
 
         Nx_obs = len(xobs)
         Nx_dat = len(xdat)
 
+        comp_array = np.array( [list(np.array(xdat))] * Nx_obs)
+        comp_array2 = np.transpose(np.array( [xobs] * Nx_dat), [1,0,2])
+
+        diffsqr = np.sum(np.abs(comp_array - comp_array2) /sigma, axis = 2)
+
+        return diffsqr
+
+    def compare_snap(self, xdat, snapshot, sigma, observed=[np.array([0])]):
+
+        Nx_obs = len(snapshot[0][1])
+        Nx_dat = len(xdat)
+
         diffsqr = np.zeros([Nx_obs, Nx_dat])
-        for obs_idx in observed:
-            comp_array = np.array( [list(np.array(xdat[:, obs_idx]))] * Nx_obs)
-            comp_array2 = np.transpose(np.array( [list(np.array(xobs[:, obs_idx]))] * Nx_dat), [1,0,2])
-            diffsqr = diffsqr + np.sum(np.abs(comp_array - comp_array2) /sigma[obs_idx], axis = 2)
+
+        for obs_idx in range(0,len(observed)):
+
+            dim_interest = observed[obs_idx]
+            diffsqr = diffsqr + self.compare(xdat[:, dim_interest], snapshot[obs_idx][1], sigma = sigma[dim_interest])
 
         pyx = np.exp(-(diffsqr - np.transpose(np.matrix([[np.min(row) for row in diffsqr]] * Nx_dat))))
         pyxm = np.matrix([row / np.sum(row) for row in pyx.tolist()])
@@ -41,10 +54,12 @@ class Numerical_test:
 
         #This initialize is different from the original in that it takes in the distribution
         np.random.seed(seed)
-
+        numsample = init_snap.shape[0]   #number of supports
+        indices = range(0, numsample)
         if len(prob) == 0 :
-            x0 = np.random.choice(init_snap, Nx)
+            x0 = np.random.choice(indices, Nx)
         else:
-            x0 = np.random.choice(init_snap, Nx, p = prob)
+            x0 = np.random.choice(indices, Nx, p = prob)
 
-        return x0
+
+        return init_snap[x0,:]
