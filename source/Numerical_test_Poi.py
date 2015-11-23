@@ -67,6 +67,7 @@ class Numerical_test_Poi(Numerical_test):
             pathdat_denominator =pathdat_denominator + np.dot(integral_test.transpose(),pxnew) + alpha*np.mean(integral_old.transpose(),axis = 1)
 
             px0 = pxnew
+            snap_old = xdat_test
 
         #print 'Denominator'
         #print pathdat_denominator.shape, pathdat_denominator
