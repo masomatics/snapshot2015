@@ -22,20 +22,20 @@ class PoissonSystem:
 
     dflt_sigma = np.array([0.5, 1, 1])
 
-    def __init__(self, theta_rxn_vec_pairs=dflt_param, theta = dflt_theta, sigma = dflt_sigma):
-        self.param = theta_rxn_vec_pairs
-        self.numrxn = len(self.param)
+    def __init__(self, kinetics=dflt_param, theta = dflt_theta, sigma = dflt_sigma):
+        self.kinetics = kinetics
+        self.numrxn = len(self.kinetics)
         self.sigma = sigma
 
-        pre_rxnmatrix = np.matrix(np.zeros([len(self.param), len(self.param[0][0])]))
+        pre_rxnmatrix = np.matrix(np.zeros([len(self.kinetics), len(self.kinetics[0][0])]))
         #pre_theta = np.zeros(self.numrxn)
         reactant_v= []
         product_v =[]
         for k in range(0, self.numrxn):
-            pre_rxnmatrix[k, :] = np.matrix(self.param[k][0])
-            reactant_v = reactant_v + [self.param[k][1]]
-            product_v = product_v + [self.param[k][0]]
-            #pre_theta[k] = self.param[k][2]
+            pre_rxnmatrix[k, :] = np.matrix(self.kinetics[k][0])
+            reactant_v = reactant_v + [self.kinetics[k][1]]
+            product_v = product_v + [self.kinetics[k][0]]
+            #pre_theta[k] = self.kinetics[k][2]
         self.rxn_matrix = pre_rxnmatrix
         self.product = product_v
         self.theta = theta
@@ -99,14 +99,11 @@ class PoissonSystem:
         intensity = self.rate(np.asarray(xdat))
         rates = intensity * deltat
 
-        #print rates
-        #if np.sum(rates) > 1000: print np.sum(rates)
-
         rxn_cnt = np.random.poisson(rates)  # nsample x numrxn matrix
         deltax = rxn_cnt * self.rxn_matrix
         xnew = xdat + deltax
         tnew = tnow + deltat
-
+        xnew = np.maximum(xnew, 0)
         if record:
             return xnew, tnew, rxn_cnt, rates/self.theta
         else:
@@ -175,10 +172,9 @@ class PoissonSystem:
         rate = np.zeros([nsample, self.numrxn])
         for k in range(0, self.numrxn):
 
-            rate[:, k] = np.squeeze(self.theta[k]*np.power(xdat[:, self.reactant[k][0]], self.reactant[k][1]))
+            rate[:, k] = np.squeeze(self.theta[k]*np.prod(np.power(xdat[:, self.reactant[k][0]], self.reactant[k][1]), axis = 1))
 
         rate = np.maximum(rate, 0)
-
         return rate
 
     def make_snapshots(self, snaptimes, init_snaps, observed, euler= True, delta = 0.01, default = True, nx = 1000, seed = 2):

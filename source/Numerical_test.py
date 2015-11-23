@@ -22,9 +22,9 @@ class Numerical_test:
         Nx_dat = len(xdat)
 
         comp_array = np.array( [list(np.array(xdat))] * Nx_obs)
-        comp_array2 = np.transpose(np.array( [xobs] * Nx_dat), [1,0,2])
+        comp_array2 = np.transpose(np.array([xobs] * Nx_dat), [1,0,2])
 
-        diffsqr = np.sum(np.abs(comp_array - comp_array2) /sigma, axis = 2)
+        diffsqr = np.sum(np.power(np.abs(comp_array - comp_array2) /sigma, 2)/2, axis = 2)
 
         return diffsqr
 
@@ -38,6 +38,8 @@ class Numerical_test:
         for obs_idx in range(0,len(observed)):
 
             dim_interest = observed[obs_idx]
+            #print dim_interest
+            #print sigma[dim_interest]
             diffsqr = diffsqr + self.compare(xdat[:, dim_interest], snapshot[obs_idx][1], sigma = sigma[dim_interest])
 
         pyx = np.exp(-(diffsqr - np.transpose(np.matrix([[np.min(row) for row in diffsqr]] * Nx_dat))))

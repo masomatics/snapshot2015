@@ -31,4 +31,4 @@ ntp= NumtP.Numerical_test_Poi(0.5, psystem.theta)
 
 theta_init = np.array([1, small_number,small_number,small_number,small_number])
 print theta_init
-ntp.em_algorithm(n_iter, Nx, snapshots, delta, theta_init, observed, initsnap, write = False, myalpha = alpha)
+ntp.em_algorithm(n_iter, Nx, snapshots, delta, theta_init, observed, initsnap, psystem, write = False, myalpha = alpha)

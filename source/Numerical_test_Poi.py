@@ -43,7 +43,7 @@ class Numerical_test_Poi(Numerical_test):
         for k in range(0, numslice-1):
 
 
-            time_old=times[k]
+            time_old = times[k]
             time_new = times[k+1]  # Get this from iteritem
             snap_new = snapshots[time_new]
             #print snap_new
@@ -66,8 +66,7 @@ class Numerical_test_Poi(Numerical_test):
             pathdat_numerator = pathdat_numerator + np.dot(rxns_test.transpose(),pxnew) + alpha*np.mean(rxns_old.transpose(),axis = 1)
             pathdat_denominator =pathdat_denominator + np.dot(integral_test.transpose(),pxnew) + alpha*np.mean(integral_old.transpose(),axis = 1)
 
-
-            snap_old = xdat_test
+            px0 = pxnew
 
         #print 'Denominator'
         #print pathdat_denominator.shape, pathdat_denominator
@@ -75,7 +74,7 @@ class Numerical_test_Poi(Numerical_test):
         #print 'Numerator'
         #print pathdat_numerator.shape, pathdat_numerator
 
-        thetanew = pathdat_numerator / pathdat_denominator
+        thetanew = np.sum(pathdat_numerator, axis = 0) / np.sum(pathdat_denominator, axis = 0)
 
         thetanew[np.where(thetanew == 0)] = smallnumber
         thetanew[np.isnan(thetanew)] = smallnumber
@@ -84,7 +83,7 @@ class Numerical_test_Poi(Numerical_test):
 
         return np.squeeze(thetanew)
 
-    def em_algorithm(self, n_iter, Nx, snapshots, delta, theta_init, observed, init_snap, write = False, myalpha = 0.5):
+    def em_algorithm(self, n_iter, Nx, snapshots, delta, theta_init, observed, init_snap, system, write = False, myalpha = 0.5):
 
         #Recording the current time
         d = datetime.now()
@@ -94,6 +93,9 @@ class Numerical_test_Poi(Numerical_test):
 
         #Dirichlet parameters
         alpha = myalpha
+
+        kinetics0 = system.kinetics
+        sigma0 = system.sigma
 
         #history of parameters to save
         theta_history = np.zeros([n_iter+1, theta_init.shape[0]])
@@ -117,12 +119,12 @@ class Numerical_test_Poi(Numerical_test):
 
         #BEGIN THE MAIN LOOP
 
-        heat = 0.99
+        heat = 0.99999
         for iter in range(0, n_iter):
 
             print "iteration " + str(iter) + ":", theta_approx
 
-            psystem_old = pp(theta=theta_approx)
+            psystem_old = pp(kinetics = kinetics0, theta=theta_approx, sigma= sigma0)
 
             theta_approx = self._compute_new_theta(snapshots, Nx, delta, psystem_old, observed, init_snap, seed=2)
 
