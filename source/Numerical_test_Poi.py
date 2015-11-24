@@ -35,7 +35,9 @@ class Numerical_test_Poi(Numerical_test):
         times = np.sort(np.array([key for key in snapshots]))
         numslice = len(times)
 
-        snap_old = init_snap
+        snap_old1 = init_snap
+        snap_old2 = init_snap
+
         px0 = []
         pathdat_numerator = np.zeros([1, numrxn])
         pathdat_denominator = np.zeros([1, numrxn])
@@ -47,8 +49,9 @@ class Numerical_test_Poi(Numerical_test):
             time_new = times[k+1]  # Get this from iteritem
             snap_new = snapshots[time_new]
             #print snap_new
-            snap_old_resample = self.initialize(Nx, snap_old, seed=seed*numslice + k, prob=px0)
-
+            snap_old_resample1 = self.initialize(int(Nx*(1-self.alpha)), snap_old1, seed=seed*numslice + k, prob=px0)
+            snap_old_resample2 = self.initialize(int(Nx*(self.alpha)), snap_old2, seed=seed*numslice + k, prob=px0)
+            snap_old_resample = np.concatenate([snap_old_resample1, snap_old_resample2], axis = 0)
 
             seed_common = seed * numslice+k+1
 
@@ -67,7 +70,8 @@ class Numerical_test_Poi(Numerical_test):
             pathdat_denominator =pathdat_denominator + np.dot(pxnew, integral_test) + alpha*np.mean(integral_old.transpose(),axis = 1)
 
             px0 = pxnew
-            snap_old = xdat_test
+            snap_old1 = xdat_test
+            snap_old2 = xdat_old
 
         #print 'Denominator'
         #print pathdat_denominator.shape, pathdat_denominator
