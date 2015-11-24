@@ -36,7 +36,7 @@ rxn_kinetics=[[[1., 0., 0.],  [[0.], [0.]]      ],
 
 theta0  = np.array([2, 10, 0.6, 0.2, verysmall_number, 0.1, 1.])
 sigma0  = np.array([0.1, 0.2, 0.2])
-snaptimes =np.array([0,6, 9] )
+snaptimes =np.array([0,3, 6, 9] )
 initsnap = np.array([[0,0,0]] * Nx)
 
 psystem = ps.PoissonSystem(kinetics = rxn_kinetics, theta = theta0, sigma = sigma0)

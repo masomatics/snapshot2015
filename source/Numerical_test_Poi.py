@@ -50,8 +50,10 @@ class Numerical_test_Poi(Numerical_test):
             snap_new = snapshots[time_new]
             #print snap_new
             snap_old_resample1 = self.initialize(int(Nx*(1-self.alpha)), snap_old1, seed=seed*numslice + k, prob=px0)
-            snap_old_resample2 = self.initialize(int(Nx*(self.alpha)), snap_old2, seed=seed*numslice + k, prob=px0)
-            snap_old_resample = np.concatenate([snap_old_resample1, snap_old_resample2], axis = 0)
+            #snap_old_resample2 = self.initialize(int(Nx*(self.alpha)), snap_old2, seed=seed*numslice + k, prob=px0)
+            #snap_old_resample = np.concatenate([snap_old_resample1, snap_old_resample2], axis = 0)
+            snap_old_resample = self.initialize(Nx, snap_old1, seed=seed*numslice + k, prob=px0)
+
 
             seed_common = seed * numslice+k+1
 
@@ -71,7 +73,7 @@ class Numerical_test_Poi(Numerical_test):
 
             px0 = pxnew
             snap_old1 = xdat_test
-            snap_old2 = xdat_old
+            #snap_old2 = xdat_old
 
         #print 'Denominator'
         #print pathdat_denominator.shape, pathdat_denominator
