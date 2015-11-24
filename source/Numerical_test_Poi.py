@@ -63,8 +63,8 @@ class Numerical_test_Poi(Numerical_test):
             pxnew = self.compare_snap(xdat_test, snap_new, psystem_old.sigma, observed=observed)
 
 
-            pathdat_numerator = pathdat_numerator + np.dot(rxns_test.transpose(),pxnew) + alpha*np.mean(rxns_old.transpose(),axis = 1)
-            pathdat_denominator =pathdat_denominator + np.dot(integral_test.transpose(),pxnew) + alpha*np.mean(integral_old.transpose(),axis = 1)
+            pathdat_numerator = pathdat_numerator + np.dot(pxnew , rxns_test) + alpha*np.mean(rxns_old.transpose(),axis = 1)
+            pathdat_denominator =pathdat_denominator + np.dot(pxnew, integral_test) + alpha*np.mean(integral_old.transpose(),axis = 1)
 
             px0 = pxnew
             snap_old = xdat_test
