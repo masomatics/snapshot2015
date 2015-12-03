@@ -93,11 +93,15 @@ class PoissonSystem:
         else:
             return xnow
 
-    def update_Euler(self, xdat, tnow, deltat, record = False):
+    def update_Euler(self, xdat, tnow, deltat, mytheta = None, record = False):
+
+        if mytheta == None:
+            mytheta = self.theta.transpose()
+
 
         #nsample = len(xnow.tolist())
         intensity = self.rate(np.asarray(xdat))
-        rates = intensity * deltat
+        rates = np.multiply(intensity * deltat, mytheta)
 
         rxn_cnt = np.random.poisson(rates)  # nsample x numrxn matrix
         deltax = rxn_cnt * self.rxn_matrix
@@ -172,7 +176,7 @@ class PoissonSystem:
         rate = np.zeros([nsample, self.numrxn])
         for k in range(0, self.numrxn):
 
-            rate[:, k] = np.squeeze(self.theta[k]*np.prod(np.power(xdat[:, self.reactant[k][0]], self.reactant[k][1]), axis = 1))
+            rate[:, k] = np.squeeze(np.prod(np.power(xdat[:, self.reactant[k][0]], self.reactant[k][1]), axis = 1))
 
         rate = np.maximum(rate, 0)
         return rate
