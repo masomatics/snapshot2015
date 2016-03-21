@@ -142,31 +142,3 @@ class Numerical_test_Poi(Numerical_test):
 
         pickle.dump(theta_history, open(history_filename, "wb"))
         return theta_approx
-
-
-
-'''
-    #This method is to be removed.
-    def compare_snap(self, xdat, snapshot, sigma, obsv = [np.array([0])]):
-
-        Nx_obs = len(snapshot[0][1])
-        Nx_dat = len(xdat)
-
-        diffsqr = np.zeros([Nx_obs, Nx_dat])
-
-        for obs_idx in range(0,len(obsv)):
-
-            dim_interest = obsv[obs_idx]
-            comp_array = np.array([list(np.array(xdat[:, dim_interest]))] * Nx_obs)
-
-            comp_array2 = np.transpose(np.array([snapshot[obs_idx][1]] * Nx_dat), [1, 0, 2])
-
-            diffsqr = diffsqr + np.sum(np.abs(comp_array - comp_array2) /sigma[dim_interest], axis = 2)
-
-        pyx = np.exp(-(diffsqr - np.transpose(np.matrix([[np.min(row) for row in diffsqr]] * Nx_dat))))
-        pyxm = pyx / np.sum(pyx, axis=1)
-        px_new = np.array(np.sum(pyxm, axis=0))[0]
-        px_new = px_new / sum(px_new)
-
-        return px_new
-'''

@@ -5,7 +5,7 @@ import numpy as np
 import sys
 sys.path.append("../source")
 import Discrete_Doucet_system as dd
-import Numerical_test1 as nt
+import Numerical_test_Doucet as nt
 reload(dd)
 reload(nt)
 
@@ -66,4 +66,3 @@ test_seq = nt.DM_test(alpha =alpha0, theta_init= theta_init)
 
 
 test_seq.run_multiple_snaps(n_iter, Nx, snapshots, theta_init, write=False)
-

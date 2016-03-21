@@ -5,7 +5,6 @@ import sys
 import PoissonSystem as ps
 reload(ps)
 import cProfile
-import Numerical_test as Numt
 import Numerical_test_Poi as NumtP
 
 # rxn1 0 -> M
