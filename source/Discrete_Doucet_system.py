@@ -143,7 +143,7 @@ class Discrete_Doucet_system:
                 xdat, pdat = self.update(xdat, pdat)
             return xdat, pdat
 
-    def make_snapshots(self, nxs, times, init_snap):
+    def make_snapshots(self, nxs, times, init_snap, myseed = 2):
         """
         :param nxs:  lists of the size of observed datapoints.
         :param times:   lists of times at which the snapshots were taken
@@ -153,7 +153,7 @@ class Discrete_Doucet_system:
         snapshots={}
         for k in range(0, len(times)):
             xdat0, pdat0 = self.initialize2(nxs[k], init_snap, continuous=True)
-            snapshots[times[k]], pdatX = self.simulate(nxs[k], xdat0, tend=times[k])
+            snapshots[times[k]], pdatX = self.simulate(nxs[k], xdat0, tend=times[k], seed = myseed)
         return snapshots
 
     def moment_history(self, powers, Nx, xdat_init, tend):
@@ -166,62 +166,5 @@ class Discrete_Doucet_system:
         for t in range(0, tend + 1):
             mmt_history[t] = np.array([np.mean(np.power(xdat, exponent)) for exponent in powers])
             xdat, pdat = self.update(xdat, pdat)
-
-        return np.transpose(mmt_history)
-
-#This class must be refactored.
-class Simulate:
-    dflt_tend = 40
-    dflt_init = -1.5
-
-    def __init__(self, init=dflt_init, T=dflt_tend):
-        # self.Nx = Nx
-        # self.Ny = Ny
-        self.tend = T
-        self.init = init
-
-    def simulate(self, dsystem, Nx, seed=1, Px=np.array([]), stat=False):
-        """
-        :param stat: Boolean. True if we want to return A and B
-        :param Nx: number of samples to simulate
-        :param dsystem: the Discrete_Doucet_system
-        :return:
-        """
-        #assert isinstance(dsystem, Discrete_Doucet_system)
-        np.random.seed(seed)
-        xdat, pdat = dsystem.initialize(Nx, self.init)
-
-        if len(Px) != Nx:
-            Px = np.array([1.] * Nx)
-
-        np.random.seed(seed +1)
-
-        if stat:
-            R = len(dsystem.theta) - 1
-            A = np.matrix(np.zeros([R, R]))
-            B = np.zeros([1, R])
-            for t in range(0, self.tend):
-                fhi = dsystem.jacob(xdat)
-                A = A + np.matrix(np.array(dsystem.jacob(xdat)) * Px) * np.transpose(dsystem.jacob(xdat))
-                xdat, pdat = dsystem.update(xdat, pdat)
-                B = B + (np.array(fhi) * np.array(xdat) * Px).sum(axis=1)
-
-            return xdat, pdat, A, B
-
-        else:
-            for t in range(0, self.tend):
-                xdat, pdat = dsystem.update(xdat, pdat)
-            return xdat, pdat
-
-    def moment_history(self, dsystem, powers, Nx):
-
-        #assert isinstance(dsystem, Discrete_Doucet_system)
-        #assert isinstance(Nx, int)
-        xdat, pdat = dsystem.initialize(Nx, self.init)
-        mmt_history = np.zeros([self.tend + 1, len(powers)])
-
-        for t in range(0, self.tend + 1):
-            mmt_history[t] = np.array([np.mean(np.power(xdat, exponent)) for exponent in powers])
-            xdat, pdat = dsystem.update(xdat, pdat)
 
         return np.transpose(mmt_history)

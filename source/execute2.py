@@ -16,6 +16,7 @@ n_iter = 500
 Nx = 500
 
 
+
 #nxs = [1000, 2000, 1000]
 #times = [0, 8, 15]
 
@@ -23,7 +24,22 @@ Nx = 500
 alpha0 = 1 # CHAMPION ALPHA
 nxs = [1000, 1000, 1000, 1000, 1000] #CHAMPION SET
 times = [0, 10, 15, 20, 40] #CHAMPION SET
+
+#MAKE SNAPSHOTS
+dsystem = dd.Discrete_Doucet_system()
+snapshots= dsystem.make_snapshots(nxs, times, np.array([-1.5]))
+
+
+
 theta_init =np.array([-1.09639492,  0.17766198, -0.19591798,  0.57649007,  0.2       ])#Champion Initial condition
+
+
+print "PRETRAINING SEQUENCE..."
+theta_init = np.random.uniform(-1, 1 , 5)
+pre_test_seq = nt.DM_test(alpha =0, theta_init= theta_init)
+theta_init = pre_test_seq.pretrain(100, 50000,snapshots, theta_init)
+print "...COMPLETE"
+alpha0  = 2
 
 ##Champion Set 2 (not anymore with new compute_AandB)
 #snaptimes are [ 0  5 15 20 40]
@@ -57,8 +73,10 @@ theta_init[1] = np.min([np.abs(theta_init[1]), 1])
 #theta_init[3] = abs(theta_init[3])
 
 
-dsystem = dd.Discrete_Doucet_system()
-snapshots= dsystem.make_snapshots(nxs, times, np.array([-1.5]))
+
+
+
+
 
 theta_init[4] = 0.2
 
