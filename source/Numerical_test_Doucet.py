@@ -31,7 +31,7 @@ class DM_test:
             self.alpha = alpha
             self.theta_init = theta_init
 
-    def run_multiple_snaps(self, n_iter, Nx, snapshots, theta_init, write = False):
+    def run_multiple_snaps(self, n_iter, Nx, snapshots, theta_init, write = False, heat = 0.99):
         '''
         runs numerical experiment with Dirichlet Process based inference method.
         :n_iter:  number of iterations
@@ -69,7 +69,6 @@ class DM_test:
 
         #BEGIN THE MAIN LOOP
 
-        heat = 0.99
         for iter in range(0, n_iter):
 
             print "iteration " + str(iter) + ":" + str(theta_approx)
@@ -91,7 +90,7 @@ class DM_test:
 
         lastfew = np.int(np.ceil(np.double(n_iter)/10.))
         range_lastfew = range(n_iter-lastfew, n_iter)
-        theta_approx = np.mean(theta_history[range_lastfew], axis = 0)         
+        theta_approx = np.mean(theta_history[range_lastfew], axis = 0)
         return theta_approx
 
 

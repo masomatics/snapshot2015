@@ -39,7 +39,7 @@ theta_init =np.array([-1.09639492,  0.17766198, -0.19591798,  0.57649007,  0.2  
 #pre_test_seq = nt.DM_test(alpha =0, theta_init= theta_init)
 #theta_init = pre_test_seq.pretrain(100, 50000,snapshots, theta_init)
 #print "...COMPLETE"
-#alpha0  = 2
+#alpha0  = 100
 
 ##Champion Set 2 (not anymore with new compute_AandB)
 #snaptimes are [ 0  5 15 20 40]
@@ -60,7 +60,6 @@ theta_init =np.array([-1.09639492,  0.17766198, -0.19591798,  0.57649007,  0.2  
 #INITIAL theta set at   [ 0.00381594  0.01735446 -0.03249388  0.05159941  0.2       ]
 
 
-alpha0 = 1.
 #times = [0, 10, 15, 20, 40]
 #nxs = [1000, 1000, 1000, 1000]
 #times = [0, 10, 20, 40]
