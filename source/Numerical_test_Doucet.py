@@ -88,6 +88,10 @@ class DM_test:
             print "alpha:", alpha
 
         pickle.dump(theta_history, open(history_filename, "wb"))
+
+        lastfew = np.int(np.ceil(np.double(n_iter)/10.))
+        range_lastfew = range(n_iter-lastfew, n_iter)
+        theta_approx = np.mean(theta_history[range_lastfew], axis = 0)         
         return theta_approx
 
 
