@@ -31,13 +31,15 @@ class DM_test:
             self.alpha = alpha
             self.theta_init = theta_init
 
-    def run_multiple_snaps(self, n_iter, Nx, snapshots, theta_init, write = False, heat = 0.99):
+    def run_multiple_snaps(self, n_iter, Nx, snapshots, theta_init, write = False, heat = 0.99, mysigma = 0):
         '''
         runs numerical experiment with Dirichlet Process based inference method.
         :n_iter:  number of iterations
         :Nx:   number of simulated points
         :snapshtos: observed snapshots.
         :theta_init: initial theta.
+        :sigma:  The sigma of parameter search. When computing the mass for computation of the posterior of DP for the probability of paths, we use perturbed version of the current parameter as probe.
+
         '''
 
         #Recording the current time
@@ -75,7 +77,7 @@ class DM_test:
 
             dsystem_old = dd.Discrete_Doucet_system(theta=theta_approx)
 
-            A_soln, B_soln = self.__compute_A_and_B(snapshots, Nx, alpha, dsystem_old, iter)
+            A_soln, B_soln = self.__compute_A_and_B(snapshots, Nx, alpha, dsystem_old, iter, sigma = mysigma)
 
             theta_approx = np.array(np.linalg.inv(A_soln) * np.matrix(B_soln).transpose())
 
@@ -94,21 +96,32 @@ class DM_test:
         return theta_approx
 
 
-    def __compute_A_and_B(self, snapshots, Nx, alpha, dsystem_old, seed):
+    def __compute_A_and_B(self, snapshots, Nx, alpha, dsystem_old, seed, sigma = 0):
 
         '''
         This function Go through all snapshots and returns the update variable A and B (refer to notes for the notation)
         *REMINDER* THE LAST PARAMETER IS EXCLUDED FROM THE SUBJECTS OF  INFERENCE!!!!
+        inputs
         :param snapshots:  dictionary (time, snapshot)
         :param Nx:         Number of simulations to be conducted for the inference
         :param alpha:      prior strength parameter in DP
         :param dsystem_old:  system
         :param seed:        seed*numslice +k, seed*numslice+k+1, seed*numslice+k+2  will be used
-        :return:   np.matrix A ,  np.array B
+        :sigma:  The sigma of parameter search. When computing the mass for computation of the posterior of DP for the probability of paths, we use perturbed version of the current parameter as probe.
+        returns   np.matrix A ,  np.array B
         '''
 
 
         theta_approx = dsystem_old.theta
+        thetamat = np.array([dsystem_old.theta]*Nx)
+        if sigma >0:
+            thetamat_perturb = thetamat * np.random.normal(1, sigma, [Nx,len(dsystem_old.theta)])
+        else:
+            thetamat_perturb = thetamat
+
+        #WE ARE FIXING THE FREQUENCY TERM
+        thetamat_perturb[:,-1] = 0.2
+
         numparam = len(theta_approx)
 
         #THIS REMOVES THE LAST  PARAMETER FROM THE INFERENCE TARGET
@@ -132,16 +145,20 @@ class DM_test:
             snap_old_resample, pdatX= dsystem_old.initialize2(Nx, snap_old, continuous=False, seed=seed*numslice +k, prob= px0)
 
             seed_common = seed * numslice+k+1
-            xdat_test, pdatX= dsystem_old.simulate(Nx, snap_old_resample, tend=time_new - time_old, seed=seed_common)
+
+            #NEWLY OBSERVED MASS
+            xdat_test, pdatX= dsystem_old.simulate(Nx, snap_old_resample, thetamat_perturb, tend=time_new - time_old,  seed=seed_common)
             #xdat_test serves as new snap_old
             snap_old = xdat_test
             px0 = dsystem_old.compare(xdat_test, snap_new)
             px = Nx * px0
 
             #NEW weight with PX IT  IS CRITICAL THAT the PX and xdat_new is generated from the same SEED
-            xdat_new, pdat_new, A_new, B_new = dsystem_old.simulate(Nx, snap_old_resample, tend=time_new - time_old, seed=seed_common, Px=px, stat=True)
+            xdat_new, pdat_new, A_new, B_new = dsystem_old.simulate(Nx, snap_old_resample, thetamat_perturb, tend=time_new - time_old,seed=seed_common, Px=px, stat=True)
+
+            #DIRICHLET PRIOR COMPONENT
             #OLD weight. PX is gone.
-            xdat_old, pdat_old, A_old, B_old = dsystem_old.simulate(Nx, snap_old_resample, tend=time_new - time_old, seed=seed*numslice+k+2,  stat=True)
+            xdat_old, pdat_old, A_old, B_old = dsystem_old.simulate(Nx, snap_old_resample, thetamat, tend=time_new - time_old, seed=seed*numslice+k+2,  stat=True)
 
             A_soln = A_soln + (A_new + alpha *A_old)
             B_soln = B_soln + (B_new + alpha *B_old)

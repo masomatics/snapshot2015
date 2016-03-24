@@ -11,7 +11,7 @@ class Discrete_Doucet_system:
         self.theta = theta
         self.sigma = sigma
 
-    def update(self, xdat, pdat):
+    def update(self, xdat, pdat, thetamat):
         """
         Update the xdat by xdat + f(xdat).  Also reports the log of the likelihood
 
@@ -22,7 +22,9 @@ class Discrete_Doucet_system:
 
         sys_noise = np.random.normal(0., self.sigma[0], len(xdat))
         # obs_noise = np.random.normal(0., self.sigma[1], len(xdat))
-        xdat_new = np.sum(self.fval(xdat), 0) + sys_noise
+        #thetamat = np.array([self.theta]*len(xdat))
+        fvalmatrix = self.fval(xdat, thetamat)
+        xdat_new = np.sum(fvalmatrix, 0) + sys_noise
         # ydat_new = xdat_new + obs_noise
         xlog_likelihood = np.log(np.power(sys_noise, 2.))
         pdat = pdat + xlog_likelihood
@@ -63,14 +65,14 @@ class Discrete_Doucet_system:
         return x0, p0
 
 
-    def fval(self, xdat):
+    def fval(self, xdat, thetamat):
         """
         Computes f(xdat), the update value
 
         :returns: f(xdat)
         """
-        fvalue = np.matrix([[self.theta[0]] * len(xdat), self.theta[1] * xdat, self.theta[2] * \
-                            (xdat / (1. + np.power(xdat, 2))), self.theta[3] * np.cos(self.theta[4] * xdat)])
+        fvalue = np.matrix([thetamat[:,0], thetamat[:,1] * xdat, thetamat[:,2]* \
+                            (xdat / (1. + np.power(xdat, 2))), thetamat[:,3] * np.cos(thetamat[:,4] * xdat)])
         return fvalue
 
     def jacob(self, xdat, sine=False):
@@ -106,7 +108,7 @@ class Discrete_Doucet_system:
 
         return px_new
 
-    def simulate(self, Nx, init_xdat, tend, seed =2, Px=np.array([]), stat = False):
+    def simulate(self, Nx, init_xdat, thetamat, tend,  seed =2, Px=np.array([]), stat = False):
         """
         This version of the fxn simulate allows arbitrary distributional input.
         For the generation of mock-obs data, call this function multiple times.
@@ -117,6 +119,8 @@ class Discrete_Doucet_system:
         matrix A, B  (refer to the equation in the article)
         ndarray pdat(likelihood), xdat(terminal value)
         """
+        #
+
         np.random.seed(seed)
 
         xdat = init_xdat
@@ -133,14 +137,14 @@ class Discrete_Doucet_system:
             for t in range(0, tend):
                 fhi = self.jacob(xdat)
                 A = A + np.matrix(np.array(self.jacob(xdat)) * Px) * np.transpose(self.jacob(xdat))
-                xdat, pdat = self.update(xdat, pdat)
+                xdat, pdat = self.update(xdat, pdat, thetamat)
                 B = B + (np.array(fhi) * np.array(xdat) * Px).sum(axis=1)
 
             return xdat, pdat, A, B
 
         else:
             for t in range(0, tend):
-                xdat, pdat = self.update(xdat, pdat)
+                xdat, pdat = self.update(xdat, pdat, thetamat)
             return xdat, pdat
 
     def make_snapshots(self, nxs, times, init_snap, myseed = 2):
@@ -150,10 +154,12 @@ class Discrete_Doucet_system:
         :param init_snap:  The initial snapshot. Default is Gauss around -1.5
         :return:  Tuple Snapshots. THe sets of  (time,  nx)
         """
+
         snapshots={}
         for k in range(0, len(times)):
+            thetamat = np.array([self.theta]*nxs[k])
             xdat0, pdat0 = self.initialize2(nxs[k], init_snap, continuous=True)
-            snapshots[times[k]], pdatX = self.simulate(nxs[k], xdat0, tend=times[k], seed = myseed)
+            snapshots[times[k]], pdatX = self.simulate(nxs[k], xdat0, thetamat, tend=times[k], seed = myseed)
         return snapshots
 
     def moment_history(self, powers, Nx, xdat_init, tend):

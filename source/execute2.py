@@ -14,14 +14,19 @@ nxtest = 20000
 t_end = 20
 n_iter = 500
 Nx = 500
-
-
+#Nx = 2000
+my_sigma = 0
+#my_sigma = 1
+myheat = 0.99
+#myheat = 1
+alpha0 = 1
 
 #nxs = [1000, 2000, 1000]
 #times = [0, 8, 15]
 
 #Champion set 1
-alpha0 = 1 # CHAMPION ALPHA
+
+#alpha0 = 1 # CHAMPION ALPHA
 nxs = [1000, 1000, 1000, 1000, 1000] #CHAMPION SET
 times = [0, 10, 15, 20, 40] #CHAMPION SET
 
@@ -82,6 +87,6 @@ theta_init[4] = 0.2
 test_seq = nt.DM_test(alpha =alpha0, theta_init= theta_init)
 
 
-theta_approx_last = test_seq.run_multiple_snaps(n_iter, Nx, snapshots, theta_init, write=False)
+theta_approx_last = test_seq.run_multiple_snaps(n_iter, Nx, snapshots, theta_init, write=False, mysigma = my_sigma, heat = myheat)
 
 print(str(theta_approx_last))
