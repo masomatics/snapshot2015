@@ -82,4 +82,6 @@ theta_init[4] = 0.2
 test_seq = nt.DM_test(alpha =alpha0, theta_init= theta_init)
 
 
-test_seq.run_multiple_snaps(n_iter, Nx, snapshots, theta_init, write=False)
+theta_approx_last = test_seq.run_multiple_snaps(n_iter, Nx, snapshots, theta_init, write=False)
+
+print(str(theta_approx_last))
