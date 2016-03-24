@@ -117,7 +117,12 @@ class DM_test:
         theta_approx = dsystem_old.theta
         thetamat = np.array([dsystem_old.theta]*Nx)
         if sigma >0:
-            thetamat_perturb = thetamat * np.random.normal(1, sigma, [Nx,len(dsystem_old.theta)])
+            #ORIGINAL
+            #thetamat_perturb = thetamat * np.random.normal(1, sigma, [Nx,len(dsystem_old.theta)])
+            perturb_scale = np.random.normal(1, sigma, [1,len(dsystem_old.theta)])
+            theta_perturb = theta_approx * perturb_scale
+            thetamat_perturb = np.array([theta_perturb[0]]*Nx)
+            print "perturbed:" + str(theta_perturb)
         else:
             thetamat_perturb = thetamat
 

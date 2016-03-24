@@ -160,6 +160,7 @@ class Discrete_Doucet_system:
             thetamat = np.array([self.theta]*nxs[k])
             xdat0, pdat0 = self.initialize2(nxs[k], init_snap, continuous=True)
             snapshots[times[k]], pdatX = self.simulate(nxs[k], xdat0, thetamat, tend=times[k], seed = myseed)
+
         return snapshots
 
     def moment_history(self, powers, Nx, xdat_init, tend):
@@ -168,9 +169,9 @@ class Discrete_Doucet_system:
         #assert isinstance(Nx, int)
         xdat, pdat = self.initialize2(Nx, xdat_init, continuous = True)
         mmt_history = np.zeros([tend + 1, len(powers)])
-
+        thetamat = np.array([self.theta]*len(xdat))
         for t in range(0, tend + 1):
             mmt_history[t] = np.array([np.mean(np.power(xdat, exponent)) for exponent in powers])
-            xdat, pdat = self.update(xdat, pdat)
+            xdat, pdat = self.update(xdat, pdat,thetamat)
 
         return np.transpose(mmt_history)
