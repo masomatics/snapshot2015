@@ -86,7 +86,9 @@ class DM_test:
             theta_history[iter] = theta_approx
 
             alpha = alpha * heat
+            mysigma = mysigma * heat
             print "alpha:", alpha
+            print "sigma:", mysigma
 
         pickle.dump(theta_history, open(history_filename, "wb"))
 
