@@ -144,6 +144,7 @@ class PoissonSystem:
 
         param_record_dat = np.zeros([numsamples, self.numrxn])
         internal_integral = np.zeros([numsamples, self.numrxn])
+        record_logp = np.zeros([numsamples, 1])
 
         while tend >tinit and tnow < (tend + numerical_precision):
             if np.abs(nextmark - tnow) < numerical_precision and record == True:
@@ -211,5 +212,3 @@ class PoissonSystem:
                 snapshots[snaptimes[index]][obsv_index]= [observed[obsv_index],  xdat[:,observed[obsv_index]]]
 
         return snapshots
-
-

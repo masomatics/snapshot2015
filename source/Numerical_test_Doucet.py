@@ -101,7 +101,7 @@ class DM_test:
     def __compute_A_and_B(self, snapshots, Nx, alpha, dsystem_old, seed, sigma = 0):
 
         '''
-        This function Go through all snapshots and returns the update variable A and B (refer to notes for the notation)
+        This function goes through all snapshots and returns the update variable A and B (refer to notes for the notation)
         *REMINDER* THE LAST PARAMETER IS EXCLUDED FROM THE SUBJECTS OF  INFERENCE!!!!
         inputs
         :param snapshots:  dictionary (time, snapshot)
