@@ -1,4 +1,8 @@
 import numpy as np
+from scipy.special import factorial
+import util_MPC as util
+infinima = np.power(10,-20.)
+
 __author__ = 'markov'
 
 class PoissonSystem:
@@ -12,11 +16,11 @@ class PoissonSystem:
 
     parameter convention: [rxnvector, listof[reactant specie idx, order], rate]
     '''
-    dflt_param = [[[1., 0., 0.], [[0.], [0.]]],
-                  [[0., 1., 0.], [[0.], [1.]]],
-                  [[0., -2., 1], [[1.], [2.]]],
-                  [[-1., 0., 0.], [[0.], [1.]]],
-                  [[0., -1., 0.], [[1.], [1.]]]]
+    dflt_param = [[[1., 0., 0.], [[0], [0.]]],
+                  [[0., 1., 0.], [[0], [1.]]],
+                  [[0., -2., 1], [[1], [2.]]],
+                  [[-1., 0., 0.], [[0], [1.]]],
+                  [[0., -1., 0.], [[1], [1.]]]]
 
     dflt_theta = np.array([25., 1000., 0.001, 0.1, 1.])
 
@@ -47,7 +51,7 @@ class PoissonSystem:
         :param xdat: matrix([[state1], [state2], ...])
         '''
         nsample = len(xnow.tolist())
-        rates = self.rate(np.asarray(xnow))
+        rates = self.rate(np.asarray(xnow))*self.theta
         ratesum = np.sum(rates, axis=1)
         probability = rates/ratesum.reshape(nsample, 1)
         deltat = -np.array(np.log(np.random.uniform(0.0, 1.0, 1)))/ratesum.reshape(nsample, 1)
@@ -55,13 +59,12 @@ class PoissonSystem:
         rxn = [np.random.choice(choices, 1, p=probability[k]) for k in range(0, nsample)]
         xnew = xnow + np.squeeze(np.array(self.rxn_matrix[rxn, :]))
         tnew = deltat + tnow
-
         return xnew, tnew
 
 
     def run_Gillespie(self, xinit, tend, tinit= 0, record = False, maxjumps = 30000):
         '''
-
+        This makes only one trajectory.
         :param xinit:  np.matrix([[state]])   1 sample ONLY!
         :param tend:
         :param tinit:
@@ -73,13 +76,13 @@ class PoissonSystem:
         xnow = xinit
         tnow = tinit
         numspecies = xinit.shape[1]
-        numsamples = xinit.shape[0]
 
         if record:
             record_dat = np.zeros([maxjumps, numspecies])
             time_dat = np.zeros(maxjumps)
+
             record_dat[0, :] = xinit
-            time_dat[0] = 0
+            time_dat[0] = tinit
         jump_idx = 0
         while(tnow < tend and jump_idx < maxjumps):
             xnow, tnow = self.update_Gillespie(xnow, tnow)
@@ -93,7 +96,7 @@ class PoissonSystem:
         else:
             return xnow
 
-    def update_Euler(self, xdat, tnow, deltat, mytheta = None, record = False):
+    def update_Euler(self, xdat, tnow, deltat, mytheta = None, record = False, record_full_logp = False):
 
         if mytheta == None:
             mytheta = self.theta.transpose()
@@ -101,19 +104,27 @@ class PoissonSystem:
 
         #nsample = len(xnow.tolist())
         intensity = self.rate(np.asarray(xdat))
-        rates = np.multiply(intensity * deltat, mytheta)
+        fullintensity = np.multiply(intensity, mytheta)
+        lambdas = fullintensity * deltat
+        lambdas = np.maximum(lambdas, infinima)
 
-        rxn_cnt = np.random.poisson(rates)  # nsample x numrxn matrix
+        rxn_cnt = np.random.poisson(lambdas)  # nsample x numrxn matrix
         deltax = rxn_cnt * self.rxn_matrix
         xnew = xdat + deltax
         tnew = tnow + deltat
         xnew = np.maximum(xnew, 0)
         if record:
-            return xnew, tnew, rxn_cnt, rates/self.theta
+            if record_full_logp:
+                logp = - lambdas + rxn_cnt*np.log(lambdas)  - util.log_factorial(rxn_cnt)
+                logp = np.sum(logp, axis = 1)
+                #print np.log(factorial(rxn_cnt))
+                return xnew, tnew, logp
+            else:
+                return xnew, tnew, rxn_cnt, lambdas/self.theta
         else:
             return xnew, tnew
 
-    def run_Euler(self, xinit, tend, deltat, tinit=0, seed = 2, record=False, recordtime=[]):
+    def run_Euler(self, xinit, tend, deltat, tinit=0, seed = 2, record=False, record_full_logp = False , recordtime=[]):
 
         '''
 
@@ -142,9 +153,9 @@ class PoissonSystem:
             record_dat = np.zeros([recordtime.shape[0], numsamples, numspecies])
 
 
-        param_record_dat = np.zeros([numsamples, self.numrxn])
+        rxn_record_dat = np.zeros([numsamples, self.numrxn])
         internal_integral = np.zeros([numsamples, self.numrxn])
-        record_logp = np.zeros([numsamples, 1])
+        record_logp = np.zeros([1, numsamples])
 
         while tend >tinit and tnow < (tend + numerical_precision):
             if np.abs(nextmark - tnow) < numerical_precision and record == True:
@@ -156,19 +167,34 @@ class PoissonSystem:
             deltat_now = deltat + 0
             if tnow + deltat > nextmark and tnow < nextmark:
                 deltat_now = nextmark - tnow
-            xnow, tnow, record_rxn, rates_paramless = self.update_Euler(xnow, tnow, deltat_now, record = True)
-            param_record_dat = param_record_dat + record_rxn
-            internal_integral = internal_integral + rates_paramless
 
+            #This is horrible conditioning.
+            if deltat_now + tnow < (tend + numerical_precision):
+                if record_full_logp:
+                    xnow, tnow, logpDelta =  self.update_Euler(xnow, tnow, deltat_now, record = True, record_full_logp = True)
+                    record_logp = record_logp + logpDelta
+                else:
+                    xnow, tnow, record_rxn, rates_paramless = self.update_Euler(xnow, tnow, deltat_now, record = True)
+                    rxn_record_dat = rxn_record_dat + record_rxn
+                    internal_integral = internal_integral + rates_paramless
+            else:
+                tnow = deltat_now + tnow
 
-        if record:
-            return xnow, recordtime, record_dat
+        #THIS IS SUCH A BAD conditions!!!!!
+        if record_full_logp:
+            if record:
+                return xnow, recordtime, record_dat, record_logp
+            else:
+                return xnow, rxn_record_dat, internal_integral, record_logp
         else:
-            return xnow, param_record_dat, internal_integral
+            if record:
+                return xnow, recordtime, record_dat
+            else:
+                return xnow, rxn_record_dat, internal_integral
 
     def rate(self, xdat):
         '''
-
+        THIS IS parameter free rates!!!!
         :param xdat:  matrix([[state1], [state2], ... ])
         :return:
         '''
@@ -177,7 +203,9 @@ class PoissonSystem:
         rate = np.zeros([nsample, self.numrxn])
         for k in range(0, self.numrxn):
 
-            rate[:, k] = np.squeeze(np.prod(np.power(xdat[:, self.reactant[k][0]], self.reactant[k][1]), axis = 1))
+            #print self.reactant[k][0]
+            #print xdat[:, self.reactant[k][0]]
+            rate[:, k] = np.squeeze(np.prod(np.power(xdat[:, self.reactant[k][0]], self.reactant[k][1][0]), axis = 1))
 
         rate = np.maximum(rate, 0)
         return rate
@@ -212,3 +240,25 @@ class PoissonSystem:
                 snapshots[snaptimes[index]][obsv_index]= [observed[obsv_index],  xdat[:,observed[obsv_index]]]
 
         return snapshots
+
+
+    def predict_tau_ahead(self, xdistr, bigDeltat, deltat, tau, xstimP, xstimB, stim_target_index, target_index) :
+        """
+        For now, let is just work with this specific case.
+        """
+        xnow = xdistr
+        N, numspecies = xdistr.shape
+        record_logp_tau = np.zeros([1,N])
+        target_taupath = np.zeros([N, tau])
+        for k in range(0, tau):
+            #stimulus this round
+            xstim = np.array([xstimP[:,k],xstimB[:,k]] )
+            #apply the stimulus
+            xnow[:, stim_target_index] = xnow[:, stim_target_index] +  np.transpose(xstim)
+            #move the prediction forward in time
+            xnow, rxn_record_dat, internal_integral, record_logp =  self.run_Euler(xnow, bigDeltat, deltat, tinit=0, seed = 2, \
+            record=False, record_full_logp = True , recordtime=[])
+            target_taupath[:, k] = np.transpose(np.array(xnow[:, target_index]))
+            record_logp_tau = record_logp_tau + record_logp
+
+        return xnow, target_taupath, record_logp_tau
