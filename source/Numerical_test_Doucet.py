@@ -31,7 +31,7 @@ class DM_test:
             self.alpha = alpha
             self.theta_init = theta_init
 
-    def run_multiple_snaps(self, n_iter, Nx, snapshots, theta_init, write = False, heat = 0.99, mysigma = 0):
+    def run_multiple_snaps(self, n_iter, Nx, snapshots, theta_init, write = False, heat = 0.99, mysigma = 0, myseed = 0):
         '''
         runs numerical experiment with Dirichlet Process based inference method.
         :n_iter:  number of iterations
@@ -77,7 +77,8 @@ class DM_test:
 
             dsystem_old = dd.Discrete_Doucet_system(theta=theta_approx)
 
-            A_soln, B_soln = self.__compute_A_and_B(snapshots, Nx, alpha, dsystem_old, iter, sigma = mysigma)
+            seed_thisiter = myseed + iter
+            A_soln, B_soln = self.__compute_A_and_B(snapshots, Nx, alpha, dsystem_old, seed_thisiter, sigma = mysigma)
 
             theta_approx = np.array(np.linalg.inv(A_soln) * np.matrix(B_soln).transpose())
 
