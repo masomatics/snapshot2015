@@ -64,11 +64,14 @@ for run_seed in range(num_trials):
     d = datetime.now()
     timenow = str(d.year) + "_" + str(d.month) + str(d.day) + "_" + str(d.hour) + str(d.minute) + "alpha_" + str(test_alpha)
 
-    dataset_filename = "../records/terminal_thetas_alpha_experiment" +  timenow + ".p"
-
     print(str(theta_approx_last))
     theta_approxes[run_seed, :] =  theta_approx_last
 
+    print str(run_seed) +  "th Round...COMPLETE"
+
+
 print theta_approxes
+
+dataset_filename = "../records/terminal_thetas_alpha_experiment" +  timenow + ".p"
 
 pickle.dump(theta_approxes, open(dataset_filename, "wb"))
