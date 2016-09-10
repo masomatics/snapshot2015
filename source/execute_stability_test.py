@@ -11,8 +11,8 @@ reload(dd)
 reload(nt)
 
 
-test_alpha  =0
-num_trials = 10
+test_alpha  =2.0         #CHANGE THIS!
+num_trials = 3           #CHANGE THIS!!
 theta_approxes = np.zeros([num_trials, 5])
 
 nxobs = 1000
@@ -27,7 +27,7 @@ myheat = 0.999
 alpha0 = test_alpha  #CHAMPION
 
 Nx_pretrain = 10000
-iter_pretrain = 2
+iter_pretrain = 2       #CHANGE THIS!!!  
 
 nxs = [1000, 1000, 1000, 1000, 1000] #CHAMPION SET
 #times = [0, 10, 15, 20, 40] #CHAMPION SET
