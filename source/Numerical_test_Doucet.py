@@ -9,6 +9,10 @@ sys.path.append("../source")
 import Discrete_Doucet_system as dd
 reload(dd)
 
+"""
+THERE IS ABSOLUTELY NO NEED TO MAKE THIS INTO CLASS!!
+THIS HAS TO BE REFACTORED!!!
+"""
 
 class DM_test:
 
@@ -78,11 +82,8 @@ class DM_test:
             dsystem_old = dd.Discrete_Doucet_system(theta=theta_approx)
 
             seed_thisiter = myseed + iter
-            A_soln, B_soln = self.__compute_A_and_B(snapshots, Nx, alpha, dsystem_old, seed_thisiter, sigma = mysigma)
 
-            theta_approx = np.array(np.linalg.inv(A_soln) * np.matrix(B_soln).transpose())
-
-            theta_approx = np.array(theta_approx.transpose().tolist()[0] + [0.2])
+            theta_approx = self.conduct_EM(snapshots, Nx, alpha, dsystem_old, seed_thisiter, sigma = mysigma)
 
             theta_history[iter] = theta_approx
 
@@ -96,6 +97,14 @@ class DM_test:
         lastfew = np.int(np.ceil(np.double(n_iter)/10.))
         range_lastfew = range(n_iter-lastfew, n_iter)
         theta_approx = np.mean(theta_history[range_lastfew], axis = 0)
+        return theta_approx
+
+    def conduct_EM(self, snapshots, Nx, alpha, dsystem_old, seed_thisiter, sigma = 1):
+        A_soln, B_soln = self.__compute_A_and_B(snapshots, Nx, alpha, dsystem_old, seed_thisiter, sigma = sigma)
+
+        theta_approx = np.array(np.linalg.inv(A_soln) * np.matrix(B_soln).transpose())
+
+        theta_approx = np.array(theta_approx.transpose().tolist()[0] + [0.2])
         return theta_approx
 
 
@@ -206,3 +215,48 @@ class DM_test:
         for key in snapshots.keys():
             mean_snaps[key] = np.array([np.mean(snapshots[key])])
         return mean_snaps
+
+    def run_Estep_variance_test(self, Nx, snapshots, theta_init, write = False, heat = 0.99, mysigma = 0, myseed = 0, repeats = 3):
+
+        #Dirichlet parameters
+        alpha = self.alpha
+
+        #history of parameters to save
+        theta_record = np.zeros([repeats, theta_init.shape[0]])
+        times = np.sort(np.array([key for key in snapshots]))
+        nxs = [snap.shape[0] for time, snap in snapshots.iteritems()]
+        print "This computation is now done with new compute_AandB that does not use the intermediate snapshots as the inits"
+        print "snaptimes are " + str(times)
+        print "initial theta is: ", self.theta_init
+        print "Nx test is:", str(Nx)
+        print "Nx observed are:", str(nxs)
+        print "Alpha is :", str(self.alpha)
+        print "INITIAL theta set at  " , theta_init
+
+        #BEGIN THE MAIN LOOP
+
+        for iter in range(0, repeats):
+
+            print "iteration " + str(iter) + ":" + str(theta_init)
+
+            dsystem_old = dd.Discrete_Doucet_system(theta=theta_init)
+
+            seed_thisiter = myseed + iter
+
+            theta_approx = self.conduct_EM(snapshots, Nx, alpha, dsystem_old, seed_thisiter, sigma = mysigma)
+
+            theta_record[iter] = theta_approx
+
+            alpha = alpha * heat
+            mysigma = mysigma * heat
+            print "alpha:", alpha
+            print "sigma:", mysigma
+
+            print theta_approx
+            theta_record[iter] = theta_approx
+
+
+        #print theta_record
+        theta_variance = np.var(theta_record, axis = 0 )
+        theta_mean = np.mean(theta_record, axis = 0)
+        return theta_variance
