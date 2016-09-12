@@ -247,7 +247,6 @@ class DM_test:
 
             theta_record[iter] = theta_approx
 
-            alpha = alpha * heat
             mysigma = mysigma * heat
             print "alpha:", alpha
             print "sigma:", mysigma

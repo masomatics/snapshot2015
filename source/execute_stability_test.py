@@ -27,7 +27,7 @@ myheat = 0.999
 alpha0 = test_alpha  #CHAMPION
 
 Nx_pretrain = 10000
-iter_pretrain = 2       #CHANGE THIS!!!  
+iter_pretrain = 2       #CHANGE THIS!!!
 
 nxs = [1000, 1000, 1000, 1000, 1000] #CHAMPION SET
 #times = [0, 10, 15, 20, 40] #CHAMPION SET
@@ -47,9 +47,14 @@ for run_seed in range(num_trials):
 
     print "PRETRAINING SEQUENCE..."
 
-    theta_init = np.random.uniform(-1, 1 , 5)
-    pre_test_seq = nt.DM_test(alpha =0, theta_init= theta_init)
-    theta_init = pre_test_seq.pretrain(iter_pretrain, Nx_pretrain ,snapshots, theta_init)
+    #theta_init = np.random.uniform(-1, 1 , 5)
+    #pre_test_seq = nt.DM_test(alpha =0, theta_init= theta_init)
+    #theta_init = pre_test_seq.pretrain(iter_pretrain, Nx_pretrain ,snapshots, theta_init)
+
+    '''
+    This is what can be obtained from pretraining for this specific set with 100 iteration
+    '''
+    theta_init = np.array([-1.38266457,  0.03831401,  0.25079858,  0.18597698,  0.2   ])
     print "...COMPLETE"
 
     theta_init[1] = np.min([np.abs(theta_init[1]), 1])

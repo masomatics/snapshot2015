@@ -16,13 +16,13 @@ reload(nt)
 nxobs = 1000
 nxtest = 20000
 t_end = 20
-this_repeat = 4
+this_repeat = 150
 Nx = 1000
 my_sigma = 0
 #my_sigma = 0.01  #CHAMPION
 myheat = 0.999
 #alpha0 = 0
-alpha0 =0  #CHAMPION
+alpha0 =1  #CHAMPION
 
 #testseed = 2
 #Nx_pretrain = 10000
@@ -61,9 +61,12 @@ theta_inits  = pickle.load( open( "../records/thetahistory_multiple_slices2016_9
 
 #print theta_inits
 #print theta_inits.shape
-theta_variances = np.zeros(theta_inits.shape)
+index_range = [0, 5, 20, 50]
 
-for theta_init_index in range(0, len(theta_inits)):
+theta_variances = np.zeros([len(index_range), theta_inits.shape[1]])
+
+
+for theta_init_index in range(0, len(index_range)):
 
 
     theta_init =  theta_inits[theta_init_index]
