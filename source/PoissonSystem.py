@@ -1,6 +1,13 @@
+"""
+PoissonSystem.py
+
+"""
+
+
+
 import numpy as np
 from scipy.special import factorial
-import util_MPC as util
+import util_Snap as util
 infinima = np.power(10,-20.)
 
 __author__ = 'markov'
@@ -23,7 +30,6 @@ class PoissonSystem:
                   [[0., -1., 0.], [[1], [1.]]]]
 
     dflt_theta = np.array([25., 1000., 0.001, 0.1, 1.])
-
     dflt_sigma = np.array([0.5, 1, 1])
 
     def __init__(self, kinetics=dflt_param, theta = dflt_theta, sigma = dflt_sigma):
@@ -44,6 +50,12 @@ class PoissonSystem:
         self.product = product_v
         self.theta = theta
         self.reactant = reactant_v
+    """
+    def __init__(self, rxn_matrix= dflt_rxnMat, theta=dflt_theta, reactant=dflt_reactant, sigma = dflt_sigma):
+        self.rxn_matrix = rxn_matrix
+        self.reactant = reactant
+        self.sigma = sigma
+    """
 
     def update_Gillespie(self, xnow, tnow):
         '''

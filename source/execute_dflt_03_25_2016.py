@@ -12,16 +12,23 @@ reload(nt)
 nxobs = 1000
 nxtest = 20000
 t_end = 20
-n_iter = 500
+n_iter = 100
 Nx = 1000
-my_sigma = 0.01
+my_sigma = 0
+#my_sigma = 0.01  #CHAMPION
 myheat = 0.999
-alpha0 = 1
+#alpha0 = 0
+alpha0 =1  #CHAMPION
+
+testseed = 2
 Nx_pretrain = 10000
 iter_pretrain = 100
 
 nxs = [1000, 1000, 1000, 1000, 1000] #CHAMPION SET
-times = [0, 10, 15, 20, 40] #CHAMPION SET
+#times = [0, 10, 15, 20, 40] #CHAMPION SET
+
+times = [0, 10, 15, 30, 40] # This set does not work when alpha = 0
+
 
 #MAKE SNAPSHOTS
 dsystem = dd.Discrete_Doucet_system()
@@ -41,6 +48,6 @@ theta_init[4] = 0.2
 test_seq = nt.DM_test(alpha =alpha0, theta_init= theta_init)
 
 
-theta_approx_last = test_seq.run_multiple_snaps(n_iter, Nx, snapshots, theta_init, write=False, mysigma = my_sigma, heat = myheat)
+theta_approx_last = test_seq.run_multiple_snaps(n_iter, Nx, snapshots, theta_init, write=False, mysigma = my_sigma, myseed = testseed, heat = myheat)
 
 print(str(theta_approx_last))
