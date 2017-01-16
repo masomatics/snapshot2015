@@ -14,14 +14,14 @@ reload(nt)
 
 
 
-test_alpha  =3.0         #CHANGE THIS!
-num_trials = 1           #CHANGE THIS!!
+test_alpha  =5.0         #CHANGE THIS!
+num_trials = 2          #CHANGE THIS!!
 theta_approxes = np.zeros([num_trials, 5])
 
 nxobs = 1000
 nxtest = 20000
 t_end = 20
-n_iter = 200
+n_iter = 600
 Nx = 1000
 my_sigma = 0
 #my_sigma = 0.01  #CHAMPION
@@ -55,14 +55,19 @@ snapshots= dsystem.make_snapshots(nxs, times, np.array([-1.5]))
 
 print "PRETRAINING SEQUENCE..."
 
-theta_init = np.random.uniform(-1, 1 , 5)
-pre_test_seq = nt.DM_test(alpha =0, theta_init= theta_init)
-theta_init0 = pre_test_seq.pretrain(iter_pretrain, Nx_pretrain ,snapshots, theta_init)
+#theta_init = np.random.uniform(-1, 1 , 5)
+#pre_test_seq = nt.DM_test(alpha =0, theta_init= theta_init)
+#theta_init0 = pre_test_seq.pretrain(iter_pretrain, Nx_pretrain ,snapshots, theta_init)
 
 '''
-This is what can be obtained from pretraining for this specific set with 100 iteration
+This is what can be obtained from pretraining for this specific set with 100 iteration for default parameter.
 '''
 #theta_init = np.array([-1.38266457,  0.03831401,  0.25079858,  0.18597698,  0.2   ])
+
+'''
+This is what can be obtained from pretraining for this specific set with 100 iteration for [0.5, 0.7, 18, 2, 0.2]
+'''
+theta_init0 = np.array([0.72016245,  0.02013309,  0.15208636,  0.02847037,  0.2])
 print "...COMPLETE"
 
 
