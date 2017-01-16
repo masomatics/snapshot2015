@@ -11,14 +11,17 @@ reload(dd)
 reload(nt)
 
 
-test_alpha  =2.0         #CHANGE THIS!
-num_trials = 3           #CHANGE THIS!!
+
+
+
+test_alpha  =3.0         #CHANGE THIS!
+num_trials = 1           #CHANGE THIS!!
 theta_approxes = np.zeros([num_trials, 5])
 
 nxobs = 1000
 nxtest = 20000
 t_end = 20
-n_iter = 5
+n_iter = 200
 Nx = 1000
 my_sigma = 0
 #my_sigma = 0.01  #CHAMPION
@@ -27,7 +30,7 @@ myheat = 0.999
 alpha0 = test_alpha  #CHAMPION
 
 Nx_pretrain = 10000
-iter_pretrain = 2       #CHANGE THIS!!!
+iter_pretrain = 100       #CHANGE THIS!!!
 
 nxs = [1000, 1000, 1000, 1000, 1000] #CHAMPION SET
 #times = [0, 10, 15, 20, 40] #CHAMPION SET
@@ -35,28 +38,39 @@ nxs = [1000, 1000, 1000, 1000, 1000] #CHAMPION SET
 times = [0, 10, 15, 30, 40] # This set does not work when alpha = 0
 
 
+d = datetime.now()
+timenow = str(d.year) + "_" + str(d.month) + str(d.day) + "_" + str(d.hour) + str(d.minute) + "alpha_" + str(test_alpha)
+std_filename = "../records/terminal_thetas_alpha_experiment" +  timenow + "_stdout.txt"
+sys.stdout= open(std_filename, 'w')
+
+print('In this experiment, I am running multiple sequences of snapshot learning and saving the terminal parameters to a file.')
+
+
+
+#MAKE SNAPSHOTS
+theta_test = np.array([0.5, 0.7, 18, 2, 0.2])
+dsystem = dd.Discrete_Doucet_system(theta = theta_test)
+print "the true parameter is: " +  np.str(dsystem.theta)
+snapshots= dsystem.make_snapshots(nxs, times, np.array([-1.5]))
+
+print "PRETRAINING SEQUENCE..."
+
+theta_init = np.random.uniform(-1, 1 , 5)
+pre_test_seq = nt.DM_test(alpha =0, theta_init= theta_init)
+theta_init0 = pre_test_seq.pretrain(iter_pretrain, Nx_pretrain ,snapshots, theta_init)
+
+'''
+This is what can be obtained from pretraining for this specific set with 100 iteration
+'''
+#theta_init = np.array([-1.38266457,  0.03831401,  0.25079858,  0.18597698,  0.2   ])
+print "...COMPLETE"
+
 
 for run_seed in range(num_trials):
 
     testseed = run_seed
 
-    #MAKE SNAPSHOTS
-    dsystem = dd.Discrete_Doucet_system()
-    snapshots= dsystem.make_snapshots(nxs, times, np.array([-1.5]))
-
-
-    print "PRETRAINING SEQUENCE..."
-
-    #theta_init = np.random.uniform(-1, 1 , 5)
-    #pre_test_seq = nt.DM_test(alpha =0, theta_init= theta_init)
-    #theta_init = pre_test_seq.pretrain(iter_pretrain, Nx_pretrain ,snapshots, theta_init)
-
-    '''
-    This is what can be obtained from pretraining for this specific set with 100 iteration
-    '''
-    theta_init = np.array([-1.38266457,  0.03831401,  0.25079858,  0.18597698,  0.2   ])
-    print "...COMPLETE"
-
+    theta_init = theta_init0
     theta_init[1] = np.min([np.abs(theta_init[1]), 1])
     theta_init[4] = 0.2
 

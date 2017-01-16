@@ -35,7 +35,12 @@ nxs = [1000, 1000, 1000, 1000, 1000] #CHAMPION SET
 
 times = [0, 10, 15, 30, 40] # This set does not work when alpha = 0
 
-theta_init = np.array([-1.38266457,  0.03831401,  0.25079858,  0.18597698,  0.2   ])
+#This is the initial from just matching the mean
+#theta_init = np.array([-1.38266457,  0.03831401,  0.25079858,  0.18597698,  0.2   ])
+
+
+#Initial from 100th of 'thetahistory_multiple_slices2016_915_2028.p'
+theta_init = np.array[ -1.746396  ,   0.54001062,  12.0395347 ,   4.34990197,   0.2       ])
 
 
 #MAKE SNAPSHOTS
@@ -44,6 +49,14 @@ snapshots= dsystem.make_snapshots(nxs, times, np.array([-1.5]))
 
 #Numerical test object
 test_seq = nt.DM_test(alpha =alpha0, theta_init= theta_init)
+
+
+d = datetime.now()
+timenow = str(d.year) + "_" + str(d.month) + str(d.day) + "_" + str(d.hour) + str(d.minute) + "alpha_" + str(test_alpha)
+std_filename = "../records/terminal_thetas_alpha_experiment" +  timenow + "_stdout.txt"
+sys.stdout= open(std_filename, 'w')
+
+print('In this experiment, I am running multiple sequences of ONE STEP of the snapshot learning and saving the terminal parameters to a file. The purpose of this experiment is to check the stability of the gradient at each step of the algorithm.')
 
 
 for run_seed in range(num_trials):
