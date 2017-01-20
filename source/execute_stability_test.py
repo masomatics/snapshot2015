@@ -14,14 +14,14 @@ reload(nt)
 
 
 
-test_alpha  =5.0         #CHANGE THIS!
-num_trials = 2          #CHANGE THIS!!
+test_alpha  =10.0         #CHANGE THIS!
+num_trials = 10          #CHANGE THIS!!
 theta_approxes = np.zeros([num_trials, 5])
 
 nxobs = 1000
 nxtest = 20000
 t_end = 20
-n_iter = 600
+n_iter = 500
 Nx = 1000
 my_sigma = 0
 #my_sigma = 0.01  #CHAMPION
@@ -35,7 +35,7 @@ iter_pretrain = 100       #CHANGE THIS!!!
 nxs = [1000, 1000, 1000, 1000, 1000] #CHAMPION SET
 #times = [0, 10, 15, 20, 40] #CHAMPION SET
 
-times = [0, 10, 15, 30, 40] # This set does not work when alpha = 0
+times = [0, 10, 20, 30, 40] # This set does not work when alpha = 0
 
 
 d = datetime.now()

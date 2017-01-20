@@ -11,15 +11,15 @@ reload(dd)
 reload(nt)
 
 
-test_alpha  =2.0         #CHANGE THIS!
-num_trials = 10          #CHANGE THIS!!
+test_alpha  =5.0         #CHANGE THIS!
+num_trials = 300          #CHANGE THIS!!
 theta_approxes = np.zeros([num_trials, 5])
 
 
 nxobs = 1000
 nxtest = 20000
 t_end = 20
-n_iter = 5
+n_iter = 1 # THIS HAS TO BE FIXED AT ONE for local stability test
 Nx = 1000
 my_sigma = 0
 #my_sigma = 0.01  #CHAMPION
@@ -28,7 +28,7 @@ myheat = 0.999
 alpha0 = test_alpha  #CHAMPION
 
 Nx_pretrain = 10000
-iter_pretrain = 2       #CHANGE THIS!!!
+iter_pretrain = 100      #CHANGE THIS!!!
 
 nxs = [1000, 1000, 1000, 1000, 1000] #CHAMPION SET
 #times = [0, 10, 15, 20, 40] #CHAMPION SET
@@ -40,7 +40,7 @@ times = [0, 10, 15, 30, 40] # This set does not work when alpha = 0
 
 
 #Initial from 100th of 'thetahistory_multiple_slices2016_915_2028.p'
-theta_init = np.array[ -1.746396  ,   0.54001062,  12.0395347 ,   4.34990197,   0.2       ])
+theta_init = np.array([ -1.746396  ,   0.54001062,  12.0395347 ,   4.34990197,   0.2       ])
 
 
 #MAKE SNAPSHOTS
@@ -64,7 +64,6 @@ for run_seed in range(num_trials):
     testseed = run_seed
 
     #n_iter = 1. Just one step.
-    n_iter =1
     theta_approx_last = test_seq.run_multiple_snaps(n_iter, Nx, snapshots, theta_init, write=False, mysigma = my_sigma, myseed = testseed, heat = myheat)
     print(str(theta_approx_last))
     theta_approxes[run_seed, :] =  theta_approx_last

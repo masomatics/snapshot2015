@@ -1,6 +1,10 @@
 import numpy as np
 from scipy.special import factorial
 
+'''
+Numerical utility
+'''
+
 
 def normalize_logP(logp):
     """
@@ -52,3 +56,81 @@ def stim_gen_tau(prevstim, N , tau, sigma = 2):
         stim_old = stimpaths[:, k]
 
     return stimpaths
+
+'''
+File utility
+'''
+
+
+def stability_checker(homedir, filename, truetheta):
+    dat = load_dat(homedir, filename)
+
+    match = np.zeros([1, len(truetheta)])
+    for k in range(len(truetheta)):
+        #print "true: "+ str(truetheta[k])
+        if truetheta[k] >  0:
+            match[0][k] = np.sum(np.abs((dat[:,k] - truetheta[k])/ truetheta[k]) < tolerance)
+            #print match[0][k]
+        else:
+            match[0][k] = np.sum(np.abs((dat[:,k] - truetheta[k])) < tolerance)
+            #print match[0][k]
+
+    return match
+
+def all_stability_checker(homedir, filename, truetheta):
+    dat = load_dat(homedir, filename)
+    Ndat = dat.shape[0]
+    matches = np.ones(Ndat)
+
+    for k in range(len(truetheta)):
+        #print "true: "+ str(truetheta[k])
+        if truetheta[k] >  0:
+            matches = matches* (   np.abs((dat[:,k] - truetheta[k])/ truetheta[k]) < tolerance)
+            #print match[0][k]
+        else:
+            matches = matches * (np.abs((dat[:,k] - truetheta[k])) < tolerance)
+            #print match[0][k]
+
+    return matches
+
+'''
+loads file from a filenamepath
+'''
+
+def load_dat(homedir, filename):
+    filepath = os.path.join(homedir, "records", filename)
+    dat = pickle.load( open( filepath, "rb" ) )
+    return dat
+
+'''
+returns dictionary of arrays for dictionary of filenames
+'''
+def load_arrays(filenames):
+    dats = {}
+    for key in filenames.keys():
+    dats.update({key:load_dat(homedir, filenames[key])}  )
+
+
+'''
+Make two overlaced histrogram for a pair of snapshots
+'''
+
+def compare_snaps(times, nxs, theta_test, theta_truth= np.array([  0. ,   0.5,  25. ,   6. ,   0.2]) ):
+
+    dsystemTruth = dd.Discrete_Doucet_system(theta = theta_truth)
+
+    dsystem2 =dd.Discrete_Doucet_system(theta = theta_test)
+
+
+    snapshotsTruth= dsystemTruth.make_snapshots(nxs, times, np.array([-1.5]))
+    snapshots2= dsystem2.make_snapshots(nxs, times, np.array([-1.5]))
+    plt.figure(figsize=(20, 4))
+
+    for k in range(len(times)):
+        plt.subplot(1,len(times), k +1 )
+        plt.title('t=' + str(times[k]))
+
+        plt.hist(snapshotsTruth[times[k]], alpha = 0.5, bins = 50)
+        plt.hist(snapshots2[times[k]], alpha = 0.5, bins = 50)
+
+    plt.show()
