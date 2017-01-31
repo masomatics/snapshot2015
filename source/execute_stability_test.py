@@ -28,6 +28,9 @@ my_sigma = 0
 myheat = 0.999
 #alpha0 = 0
 alpha0 = test_alpha  #CHAMPION
+theta_test = np.array([0.5, 0.7, 18, 2, 0.2]) #CHANGE THIS!
+#Default is np.array([0, 0.5, 25, 6, 0.2])
+
 
 Nx_pretrain = 10000
 iter_pretrain = 100       #CHANGE THIS!!!
@@ -48,7 +51,6 @@ print('In this experiment, I am running multiple sequences of snapshot learning 
 
 
 #MAKE SNAPSHOTS
-theta_test = np.array([0.5, 0.7, 18, 2, 0.2])
 dsystem = dd.Discrete_Doucet_system(theta = theta_test)
 print "the true parameter is: " +  np.str(dsystem.theta)
 snapshots= dsystem.make_snapshots(nxs, times, np.array([-1.5]))
