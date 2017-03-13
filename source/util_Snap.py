@@ -23,8 +23,8 @@ def convert_hist_to_scatter(myhist):
 
 
 def distances(dat):
-    datmean = np.mean(dat, axis =0)
-    centered = dat - datmean
+    datmean = np.mean(dat, axis =1)
+    centered = np.transpose(dat) - datmean
     centeredsqr = centered**2
     centeredL2  = np.sqrt(np.sum(centeredsqr, axis = 1))
     return centeredL2

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import datetime
 import matplotlib.animation as manimation
 
-dimdat = 400
+dimdat = 50
 N = 50   #obs
 M = 100       #sim
 numexp = 200
@@ -30,7 +30,9 @@ loc1 = 0.5
 loc2 = 0.
 alphas = np.linspace(0,1., 101)
 graphlim = 1
-myxlim = 70
+myxlim = np.sqrt(dimdat)*2
+myattention_index = [0]
+
 datelocation = "../records"
 
 
@@ -50,7 +52,6 @@ datobs = np.random.multivariate_normal(mean = np.transpose(mu1)[0], cov = sig1, 
 
 
 resoln = 500
-myattention_index = [0]
 
 
 
