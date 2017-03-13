@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import datetime
 import matplotlib.animation as manimation
 
-dimdat = 18
+dimdat = 20
 N = 50   #obs
 M = 100       #sim
 numexp = 200
@@ -28,12 +28,14 @@ mysigma = np.array([mysig, mysig])
 np.random.seed(7)
 loc1 = 0.5
 loc2 = 0.
-alphas = np.linspace(0,1., 101)
+alphas = np.linspace(0,1., 11)
 myattention_index = [0]
 histbins = 20
 myxlim = np.sqrt(dimdat)*2
 graphlim = np.double(numexp)/np.double(histbins)/np.double(2)
 filestring = "variance_test" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.mp4"
+arrayfilestringAlpha = "variance_testAlpha" + str(len(myattention_index)) + "outOf" + str(dimdat) +".npy"
+arrayfilestringOne = "variance_testOne" + str(len(myattention_index)) + "outOf" + str(dimdat) +".npy"
 
 datelocation = "../records"
 
@@ -71,9 +73,12 @@ One,  = plt.plot([], [], 'b-')
 plt.ylim([0,numexp/graphlim])
 plt.xlim([0,myxlim ])
 done = 0
-
+Alpha2besaved = np.zeros([len(alphas), 2, histbins] )
+One2besaved = np.zeros([len(alphas), 2, histbins] )
 
 myfilename = util.make_filename(filestring, location ='../records')
+myfileAlpha= util.make_filename(arrayfilestringAlpha, location ='../records')
+myfileOne = util.make_filename(arrayfilestringOne, location ='../records')
 
 with writer.saving(fig, myfilename, resoln):
 
@@ -105,6 +110,9 @@ with writer.saving(fig, myfilename, resoln):
         histalpha = util.convert_hist_to_scatter(pre_histalpha)
         histOne   = util.convert_hist_to_scatter(pre_histOne)
 
+        Alpha2besaved[done, :, :] =  histalpha
+        One2besaved[done, :, :] =  histOne
+
         #model = TSNE(n_components=2, random_state=0)
         #twoD_estimate_alpha = model.fit_transform(np.transpose(mu_estimate_alpha) )
         #twoD_estimate_One   = model.fit_transform(np.transpose(mu_estimate_1) )
@@ -122,3 +130,7 @@ with writer.saving(fig, myfilename, resoln):
         done = done +1
         #plt.scatter(mu_estimate_alpha[0,:], mu_estimate_alpha[1,:], color = 'blue')
         #plt.scatter(mu_estimate_1[0,:], mu_estimate_1[1,:], color = 'red')
+
+
+np.save(myfileAlpha  ,Alpha2besaved)
+np.save(myfileOne  ,One2besaved)
