@@ -1,9 +1,43 @@
 import numpy as np
 from scipy.special import factorial
+import datetime
+import sys
+import os
 
 '''
 Numerical utility
 '''
+
+def convert_hist_to_scatter(myhist):
+    wghts  =myhist[0]
+    values =myhist[1]
+
+    ans_array = np.zeros([2,len(wghts)])
+
+    plottable = np.array([(values[k] + values[k+1])/2. for k in range(len(values)-1)])
+
+    ans_array[0,:] = wghts
+    ans_array[1,:] = plottable
+    return ans_array
+
+
+
+def distances(dat):
+    datmean = np.mean(dat, axis =0)
+    centered = dat - datmean
+    centeredsqr = centered**2
+    centeredL2  = np.sqrt(np.sum(centeredsqr, axis = 1))
+    return centeredL2
+
+def make_filename(mystring, location = "./"):
+    today = str(datetime.date.today())
+    today= today.replace('-', '_')
+    today= today.replace(' ', '_')
+    today= today.replace(':', '_')
+    today= today.replace('.', '_')
+    filename = today + '_'  + mystring
+    filename =os.path.join(location, filename)
+    return filename
 
 
 def normalize_logP(logp):
@@ -58,6 +92,57 @@ def stim_gen_tau(prevstim, N , tau, sigma = 2):
     return stimpaths
 
 '''
+xdat : multi dimensional dataset
+xobs : multi dimensional observation
+creates len(xdat) x len(xobs) sized array of comparison, measured in Gaussian kernel with sigma.
+'''
+
+def compare(xdat, xobs, sigma =1, attention_index = []):
+
+    if len(attention_index)>0:
+        myxdat = xdat[:, attention_index]
+        myxobs = xobs[:, attention_index]
+        #print myxdat.shape
+    else:
+        myxdat = xdat
+        myxobs = xobs
+
+    Nx_obs = len(myxobs)
+    Nx_dat = len(myxdat)
+
+    comp_array = np.array( [list(np.array(myxdat))] * Nx_obs)
+    comp_array2 = np.transpose(np.array([myxobs] * Nx_dat), [1,0,2])
+
+    diffsqr = np.sum(np.power(np.abs(comp_array - comp_array2) /sigma, 2)/2, axis = 2)
+
+    return diffsqr
+
+
+'''
+creates weights from diffsqr
+'''
+
+def create_pyx(diffsqr, likelihood = False):
+    Nx_obs, Nx_dat = diffsqr.shape
+    pyx = np.exp(-(diffsqr - np.transpose(np.matrix([[np.min(row) for row in diffsqr]] * Nx_dat))))
+    pyxm = np.matrix([row / np.sum(row) for row in pyx.tolist()])
+
+    log_likelihood = -np.sum(np.multiply(pyxm , diffsqr))
+    px_new = np.array(np.sum(pyxm, 0))[0]
+    px_new = px_new / sum(px_new)
+
+    if likelihood:
+        return px_new, log_likelihood
+    else:
+        return px_new
+
+
+
+
+
+
+
+'''
 File utility
 '''
 
@@ -108,7 +193,7 @@ returns dictionary of arrays for dictionary of filenames
 def load_arrays(filenames):
     dats = {}
     for key in filenames.keys():
-    dats.update({key:load_dat(homedir, filenames[key])}  )
+        dats.update({key:load_dat(homedir, filenames[key])} )
 
 
 '''
