@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import datetime
 import matplotlib.animation as manimation
 
-dimdat = 50
+dimdat = 18
 N = 50   #obs
 M = 100       #sim
 numexp = 200
@@ -25,13 +25,15 @@ numexp = 200
 myobserved = np.array([0])
 mysig = 1.
 mysigma = np.array([mysig, mysig])
-np.random.seed(6)
+np.random.seed(7)
 loc1 = 0.5
 loc2 = 0.
 alphas = np.linspace(0,1., 101)
-graphlim = 1
-myxlim = np.sqrt(dimdat)*2
 myattention_index = [0]
+histbins = 20
+myxlim = np.sqrt(dimdat)*2
+graphlim = np.double(numexp)/np.double(histbins)/np.double(2)
+filestring = "variance_test" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.mp4"
 
 datelocation = "../records"
 
@@ -62,15 +64,15 @@ writer = FFMpegWriter(fps=20, metadata=metadata)
 fig = plt.figure()
 #Alpha = plt.scatter([], [], color = 'red')
 #One = plt.scatter([], [], color = 'blue')
-Alpha, = plt.plot([], [], 'r-o')
-One,  = plt.plot([], [], 'b-o')
+Alpha, = plt.plot([], [], 'r-')
+One,  = plt.plot([], [], 'b-')
 #plt.xlim([0.0,2])
 
 plt.ylim([0,numexp/graphlim])
 plt.xlim([0,myxlim ])
 done = 0
 
-filestring = "variance_test" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.mp4"
+
 myfilename = util.make_filename(filestring, location ='../records')
 
 with writer.saving(fig, myfilename, resoln):
@@ -98,8 +100,8 @@ with writer.saving(fig, myfilename, resoln):
         mu_estimate_alpha_distances = util.distances(mu_estimate_alpha)
         mu_estimate_One_distances = util.distances(mu_estimate_1)
 
-        pre_histalpha = plt.hist(mu_estimate_alpha_distances, alpha = 0)
-        pre_histOne = plt.hist(mu_estimate_One_distances, alpha = 0)
+        pre_histalpha = plt.hist(mu_estimate_alpha_distances, alpha = 0, bins = histbins)
+        pre_histOne = plt.hist(mu_estimate_One_distances, alpha = 0, bins = histbins)
         histalpha = util.convert_hist_to_scatter(pre_histalpha)
         histOne   = util.convert_hist_to_scatter(pre_histOne)
 
