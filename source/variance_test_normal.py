@@ -4,14 +4,19 @@ import scipy as sp
 import datetime
 import util_Snap as util
 import random
+
+#http://qiita.com/TomokIshii/items/3a26ee4453f535a69e9e
+import matplotlib as mpl
+mpl.use('Agg')
+
+
 import matplotlib.pyplot as plt
 import datetime
 import matplotlib.animation as manimation
 
-
-dimdat = 300
-N = 100   #obs
-M = 1000       #sim
+dimdat = 400
+N = 50   #obs
+M = 100       #sim
 numexp = 200
 
 #N = 4   #obs
@@ -21,10 +26,11 @@ myobserved = np.array([0])
 mysig = 1.
 mysigma = np.array([mysig, mysig])
 np.random.seed(6)
-loc1 = 0
+loc1 = 0.5
 loc2 = 0.
-alphas = np.linspace(0,1, 21)
-graphlim =2
+alphas = np.linspace(0,1., 101)
+graphlim = 1
+myxlim = 70
 datelocation = "../records"
 
 
@@ -60,6 +66,7 @@ One,  = plt.plot([], [], 'b-o')
 #plt.xlim([0.0,2])
 
 plt.ylim([0,numexp/graphlim])
+plt.xlim([0,myxlim ])
 done = 0
 
 filestring = "variance_test" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.mp4"
@@ -68,7 +75,7 @@ myfilename = util.make_filename(filestring, location ='../records')
 with writer.saving(fig, myfilename, resoln):
 
     for alpha in alphas:
-        plt.title( u'alpha: ' + np.str(alpha),size='24')
+        plt.title( u'hist of $(d(Est - \hat E))$  alpha: ' + np.str(alpha),size='24')
         mu_estimate_1     =  np.zeros([dimdat, numexp])
         mu_estimate_alpha = np.zeros([dimdat, numexp])
 

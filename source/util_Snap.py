@@ -30,7 +30,7 @@ def distances(dat):
     return centeredL2
 
 def make_filename(mystring, location = "./"):
-    today = str(datetime.date.today())
+    today = str(datetime.datetime.today())
     today= today.replace('-', '_')
     today= today.replace(' ', '_')
     today= today.replace(':', '_')
