@@ -14,28 +14,28 @@ import matplotlib.pyplot as plt
 import datetime
 import matplotlib.animation as manimation
 
-dimdat = 20
+dimdat = 5
 N = 50   #obs
 M = 100       #sim
-numexp = 200
+numexp = 1000
 
 #N = 4   #obs
 #M = 40       #sim
 
-myobserved = np.array([0])
 mysig = 1.
 mysigma = np.array([mysig, mysig])
 np.random.seed(7)
 loc1 = 0.5
 loc2 = 0.
-alphas = np.linspace(0,1., 11)
-myattention_index = [0]
+alphas = np.linspace(0,1., 41)
+#myattention_index = [0,1,2,3]
+myattention_index = range(dimdat)
+num_obs = len(myattention_index)
 histbins = 20
-myxlim = np.sqrt(dimdat)*2
-graphlim = np.double(numexp)/np.double(histbins)/np.double(2)
 filestring = "variance_test" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.mp4"
-arrayfilestringAlpha = "variance_testAlpha" + str(len(myattention_index)) + "outOf" + str(dimdat) +".npy"
-arrayfilestringOne = "variance_testOne" + str(len(myattention_index)) + "outOf" + str(dimdat) +".npy"
+arrayfilestringAlpha = "variance_testAlpha" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.npy"
+arrayfilestringOne = "variance_testOne" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.npy"
+arrayfilestring_alphachoice = "alphachoices.npy"
 
 datelocation = "../records"
 
@@ -58,10 +58,10 @@ datobs = np.random.multivariate_normal(mean = np.transpose(mu1)[0], cov = sig1, 
 resoln = 500
 
 
-
+'''
 FFMpegWriter = manimation.writers['ffmpeg']
 metadata = dict(title='Movie Test', artist='Matplotlib',
-                comment='Movie support!')
+            comment='Movie support!')
 writer = FFMpegWriter(fps=20, metadata=metadata)
 fig = plt.figure()
 #Alpha = plt.scatter([], [], color = 'red')
@@ -69,6 +69,7 @@ fig = plt.figure()
 Alpha, = plt.plot([], [], 'r-')
 One,  = plt.plot([], [], 'b-')
 #plt.xlim([0.0,2])
+'''
 
 plt.ylim([0,numexp/graphlim])
 plt.xlim([0,myxlim ])
@@ -79,58 +80,59 @@ One2besaved = np.zeros([len(alphas), 2, histbins] )
 myfilename = util.make_filename(filestring, location ='../records')
 myfileAlpha= util.make_filename(arrayfilestringAlpha, location ='../records')
 myfileOne = util.make_filename(arrayfilestringOne, location ='../records')
-
-with writer.saving(fig, myfilename, resoln):
-
-    for alpha in alphas:
-        plt.title( u'hist of $(d(Est - \hat E))$  alpha: ' + np.str(alpha),size='24')
-        mu_estimate_1     =  np.zeros([dimdat, numexp])
-        mu_estimate_alpha = np.zeros([dimdat, numexp])
-
-        for k in range(numexp):
-            datsim = np.random.multivariate_normal(mean = np.transpose(mu2)[0], cov = sig2, size = M)
-            diffsqr = util.compare(datsim, datobs, attention_index = myattention_index )
-            pyx = util.create_pyx(diffsqr)
-            qmean = np.dot(pyx, datsim)
-            mu_estimate_1[:, k] = qmean
-
-            alpha_pyx  = alpha * pyx +  (1-alpha) * 1./ M
-            alphamean = np.dot(alpha_pyx, datsim)
-
-            mu_estimate_alpha[:, k] = alphamean
-
-        writer.grab_frame()
-        #print qmean
-
-        mu_estimate_alpha_distances = util.distances(mu_estimate_alpha)
-        mu_estimate_One_distances = util.distances(mu_estimate_1)
-
-        pre_histalpha = plt.hist(mu_estimate_alpha_distances, alpha = 0, bins = histbins)
-        pre_histOne = plt.hist(mu_estimate_One_distances, alpha = 0, bins = histbins)
-        histalpha = util.convert_hist_to_scatter(pre_histalpha)
-        histOne   = util.convert_hist_to_scatter(pre_histOne)
-
-        Alpha2besaved[done, :, :] =  histalpha
-        One2besaved[done, :, :] =  histOne
-
-        #model = TSNE(n_components=2, random_state=0)
-        #twoD_estimate_alpha = model.fit_transform(np.transpose(mu_estimate_alpha) )
-        #twoD_estimate_One   = model.fit_transform(np.transpose(mu_estimate_1) )
+myfile_alpha_choices = util.make_filename(arrayfilestring_alphachoice, location ='../records')
 
 
-        if np.mod(done, 10) == 0:
-            print "complete" + str(done)
+for alpha in alphas:
+    plt.title( u'hist of $(d(Est - \hat E))$  alpha: ' + np.str(alpha),size='24')
+    mu_estimate_1     =  np.zeros([dimdat, numexp])
+    mu_estimate_alpha = np.zeros([dimdat, numexp])
 
-        #l, = plt.plot([], [], color = 'red')
-        #Alpha.set_offsets(histalpha )
-        #One.set_offsets(histOne)
-        Alpha.set_data(histalpha[1,:], histalpha[0,:])
-        One.set_data(histOne[1,:], histOne[0,:])
+    for k in range(numexp):
+        datsim = np.random.multivariate_normal(mean = np.transpose(mu2)[0], cov = sig2, size = M)
+        diffsqr = util.compare(datsim, datobs, attention_index = myattention_index )
+        pyx = util.create_pyx(diffsqr)
+        qmean = np.dot(pyx, datsim)
+        mu_estimate_1[:, k] = qmean
 
-        done = done +1
-        #plt.scatter(mu_estimate_alpha[0,:], mu_estimate_alpha[1,:], color = 'blue')
-        #plt.scatter(mu_estimate_1[0,:], mu_estimate_1[1,:], color = 'red')
+        alpha_pyx  = alpha * pyx +  (1-alpha) * 1./ M
+        alphamean = np.dot(alpha_pyx, datsim)
+
+        mu_estimate_alpha[:, k] = alphamean
+
+    #print qmean
+
+    mu_estimate_alpha_distances = util.distances(mu_estimate_alpha)
+    mu_estimate_One_distances = util.distances(mu_estimate_1)
+
+    pre_histalpha = plt.hist(mu_estimate_alpha_distances, alpha = 0, bins = histbins)
+    pre_histOne = plt.hist(mu_estimate_One_distances, alpha = 0, bins = histbins)
+    histalpha = util.convert_hist_to_scatter(pre_histalpha)
+    histOne   = util.convert_hist_to_scatter(pre_histOne)
+
+    Alpha2besaved[done, :, :] =  histalpha
+    One2besaved[done, :, :] =  histOne
+
+    #model = TSNE(n_components=2, random_state=0)
+    #twoD_estimate_alpha = model.fit_transform(np.transpose(mu_estimate_alpha) )
+    #twoD_estimate_One   = model.fit_transform(np.transpose(mu_estimate_1) )
 
 
+    if np.mod(done, 10) == 0:
+        print "complete" + str(done)
+
+    #l, = plt.plot([], [], color = 'red')
+    #Alpha.set_offsets(histalpha )
+    #One.set_offsets(histOne)
+    #Alpha.set_data(histalpha[1,:], histalpha[0,:])
+    #One.set_data(histOne[1,:], histOne[0,:])
+
+    done = done +1
+    #plt.scatter(mu_estimate_alpha[0,:], mu_estimate_alpha[1,:], color = 'blue')
+    #plt.scatter(mu_estimate_1[0,:], mu_estimate_1[1,:], color = 'red')
+
+np.save(myfile_alpha_choices, alphas)
 np.save(myfileAlpha  ,Alpha2besaved)
 np.save(myfileOne  ,One2besaved)
+
+util.convert_hists2mp4(myfilename, Alpha2besaved, One2besaved, alphas)

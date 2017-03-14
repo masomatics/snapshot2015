@@ -3,10 +3,38 @@ from scipy.special import factorial
 import datetime
 import sys
 import os
+import re
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
+import datetime
+import matplotlib.animation as manimation
 
 '''
 Numerical utility
 '''
+
+
+def convert_hists2mp4(myfilename, histalpha, histone, alphas, resoln = 500
+):
+    FFMpegWriter = manimation.writers['ffmpeg']
+    metadata = dict(title='Movie Test', artist='Matplotlib',
+                    comment='Movie support!')
+    writer = FFMpegWriter(fps=20, metadata=metadata)
+    fig2 = plt.figure()
+    Alpha, = plt.plot([], [], 'r-o', label ='$\alpha <1$')
+    One,  = plt.plot([], [], 'b-o', label = '$\alpha =1$')
+    plt.xlim([0, np.max([np.max(histalpha[:,1,:]),  np.max(histone[:,1,:]) ]) ])
+    plt.ylim([0, np.max([np.max(histalpha[:,0,:]),  np.max(histone[:,0,:]) ]) ])
+
+    with writer.saving(fig2, myfilename, resoln):
+        for k in range(len(histalpha)):
+            plt.title( u'hist of $(d(Est - \hat E))$  alpha: ' + np.str(alphas[k]),size='24')
+
+            writer.grab_frame()
+            Alpha.set_data(histalpha[k,1,:], histalpha[k,0,:])
+            One.set_data(histone[k, 1,:], histone[k, 0,:])
+
 
 def convert_hist_to_scatter(myhist):
     wghts  =myhist[0]
@@ -145,6 +173,19 @@ def create_pyx(diffsqr, likelihood = False):
 '''
 File utility
 '''
+
+#The produced time
+def extract_alpha_One_file(produced_time, homedir = '../records/'):
+    alphafile = [f for f in os.listdir('../records') if re.match(produced_time+'\w+Alpha\w+.npy', f)][0]
+    onefile = [f for f in os.listdir('../records') if re.match(produced_time +'\w+One\w+.npy', f)][0]
+    histalpha= np.load(os.path.join(homedir ,alphafile))
+    histOne  = np.load(os.path.join(homedir ,onefile))
+
+    #print histalpha
+    #print histOne
+    #print histalpha - histOne
+
+    return histalpha, histOne
 
 
 def stability_checker(homedir, filename, truetheta):
