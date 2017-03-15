@@ -14,6 +14,19 @@ import matplotlib.animation as manimation
 Numerical utility
 '''
 
+def vector_norm(vector):
+    return np.sqrt(np.sum(vector**2))
+
+
+def normalize_and_rescale(vector,myscale =1.):
+    vectnorm = vector_norm(vector)
+    rescaled_vec = vector/vectnorm*myscale
+    return rescaled_vec
+
+
+'''
+convert hists to mp4 file.
+'''
 
 def convert_hists2mp4(myfilename, histalpha, histone, alphas, resoln = 500
 ):

@@ -34,22 +34,24 @@ nxs = [1000, 1000, 1000, 1000, 1000] #CHAMPION SET
 #times = [0, 10, 15, 20, 40] #CHAMPION SET
 
 times = [0, 10, 15, 30, 40] # This set does not work when alpha = 0
-theta_truth = np.array([0.5, 0.7, 18, 2, 0.2])
 
 '''
 This is what can be obtained from pretraining with just mean for 100 iteration when the parameter is np.array([0, 0.5, 25, 6, 0.2])
 '''
+#theta_truth = np.array([0, 0.5, 25, 6, 0.2])
 #theta_init = np.array([-1.38266457,  0.03831401,  0.25079858,  0.18597698,  0.2   ])
 
 '''
 This is what can be obtained from 100 iteration of the algorithm with successful parameters.
 the parameter is drawn from the record 'thetahistory_multiple_slices2016_915_2028.p'
 '''
+#theta_truth = np.array([0, 0.5, 25, 6, 0.2])
 #theta_init = np.array([ -1.746396  ,   0.54001062,  12.0395347 ,   4.34990197,   0.2       ])
 
 '''
 This is what can be obtained from pretraining with just mean for 100 iteration when the parameter is np.array([0.5, 0.7, 18, 2, 0.2])
 '''
+#theta_truth = np.array([0.5, 0.7, 18, 2, 0.2])
 #theta_init = np.array([0.72016245,  0.02013309,  0.15208636,  0.02847037,  0.2])
 
 '''
@@ -59,6 +61,7 @@ the parameter is drawn from the record
 And particularly the one that produced
 np.array([  0.51885506,   0.70482005,  17.74052002 ,  2.03955516 ,  0.2       ])
 '''
+#theta_truth = np.array([0.5, 0.7, 18, 2, 0.2])
 #theta_init = np.array([  0.94791151,   0.50280226,  21.73608789,  -2.44260004,   0.2       ])
 
 #MAKE SNAPSHOTS (This has to be done with correct paramter)

@@ -20,7 +20,7 @@ import datetime
 import matplotlib.animation as manimation
 
 
-def run_variance_test(dimdat, N = 50, M =100, numexp = 1000,  loc1 = 0., loc2 = 0., numticks = 40, myattention_index = [], histbins = 20, datelocation = '../records'):
+def run_variance_test(dimdat, N = 50, M =100, numexp = 1000,  deltamu =10, numticks = 40, myattention_index = [], histbins = 20, datalocation = '../records'):
 
     mysig = 1.
     mysigma = np.array([mysig, mysig])
@@ -33,10 +33,7 @@ def run_variance_test(dimdat, N = 50, M =100, numexp = 1000,  loc1 = 0., loc2 = 
         myattention_index = range(dimdat)
 
 
-    if loc1 == loc2:
-        addendum = "same_mean"
-    else:
-        addendum = "different_mean_"
+    addendum = "L2deltamu" + str(int(deltamu**2)) + "_"
 
     filestring = addendum +"variance_test" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.mp4"
     arrayfilestringAlpha = addendum +"variance_testAlpha" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.npy"
@@ -45,8 +42,8 @@ def run_variance_test(dimdat, N = 50, M =100, numexp = 1000,  loc1 = 0., loc2 = 
 
 
 
-    mu1 = np.random.normal(loc= loc1, scale = 1, size = [dimdat,1])
-    mu2 = np.random.normal(loc= loc2, scale = 1, size = [dimdat,1])
+    mu1 = util.normalize_and_rescale(np.ones([dimdat,1]),deltamu)
+    mu2 = np.zeros([dimdat,1])
     #print "true mu is:   " + str(np.transpose(mu1))
     #print "initial mu  is:" + str(np.transpose(mu2))
 
@@ -62,28 +59,15 @@ def run_variance_test(dimdat, N = 50, M =100, numexp = 1000,  loc1 = 0., loc2 = 
     resoln = 500
 
 
-    '''
-    FFMpegWriter = manimation.writers['ffmpeg']
-    metadata = dict(title='Movie Test', artist='Matplotlib',
-                comment='Movie support!')
-    writer = FFMpegWriter(fps=20, metadata=metadata)
-    fig = plt.figure()
-    #Alpha = plt.scatter([], [], color = 'red')
-    #One = plt.scatter([], [], color = 'blue')
-    Alpha, = plt.plot([], [], 'r-')
-    One,  = plt.plot([], [], 'b-')
-    #plt.xlim([0.0,2])
-    '''
-
 
     done = 0
     Alpha2besaved = np.zeros([len(alphas), 2, histbins] )
     One2besaved = np.zeros([len(alphas), 2, histbins] )
 
-    myfilename = util.make_filename(filestring, location =datelocation)
-    myfileAlpha= util.make_filename(arrayfilestringAlpha, location =datelocation)
-    myfileOne = util.make_filename(arrayfilestringOne, location =datelocation)
-    myfile_alpha_choices = util.make_filename(arrayfilestring_alphachoice, location =datelocation)
+    myfilename = util.make_filename(filestring, location =datalocation)
+    myfileAlpha= util.make_filename(arrayfilestringAlpha, location =datalocation)
+    myfileOne = util.make_filename(arrayfilestringOne, location =datalocation)
+    myfile_alpha_choices = util.make_filename(arrayfilestring_alphachoice, location =datalocation)
 
 
     for alpha in alphas:

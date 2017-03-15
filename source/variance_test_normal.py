@@ -46,10 +46,14 @@ arrayfilestring_alphachoice = addendum + "alphachoices.npy"
 
 datelocation = "../records"
 
+#Distance between mu1 and mu2
+deltamu = 1.
 
 #np.random.seed(10)
-mu1 = np.random.normal(loc= loc1, scale = 1, size = [dimdat,1])
-mu2 = np.random.normal(loc= loc2, scale = 1, size = [dimdat,1])
+#mu1 = np.random.normal(loc= loc1, scale = 1, size = [dimdat,1])
+mu1 = util.normalize_and_rescale(np.ones([dimdat,1]),deltamu) 
+#mu2 = np.random.normal(loc= loc2, scale = 1, size = [dimdat,1])
+mu2 = np.zeros([dimdat,1])
 #print "true mu is:   " + str(np.transpose(mu1))
 #print "initial mu  is:" + str(np.transpose(mu2))
 
