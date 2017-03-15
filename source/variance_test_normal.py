@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import datetime
 import matplotlib.animation as manimation
 
-dimdat = 5
+dimdat = 10
 N = 50   #obs
 M = 100       #sim
 numexp = 1000
@@ -25,17 +25,24 @@ numexp = 1000
 mysig = 1.
 mysigma = np.array([mysig, mysig])
 np.random.seed(7)
-loc1 = 0.5
+#loc1 = 0.5
+loc1 = 0.
 loc2 = 0.
 alphas = np.linspace(0,1., 41)
 #myattention_index = [0,1,2,3]
 myattention_index = range(dimdat)
 num_obs = len(myattention_index)
 histbins = 20
-filestring = "variance_test" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.mp4"
-arrayfilestringAlpha = "variance_testAlpha" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.npy"
-arrayfilestringOne = "variance_testOne" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.npy"
-arrayfilestring_alphachoice = "alphachoices.npy"
+
+if loc1 == loc2:
+    addendum = "same_mean"
+else:
+    addendum = "different_mean_"
+
+filestring = addendum +"variance_test" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.mp4"
+arrayfilestringAlpha = addendum +"variance_testAlpha" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.npy"
+arrayfilestringOne = addendum +"variance_testOne" + str(len(myattention_index)) + "outOf" + str(dimdat) +"Dimen.npy"
+arrayfilestring_alphachoice = addendum + "alphachoices.npy"
 
 datelocation = "../records"
 
@@ -71,8 +78,7 @@ One,  = plt.plot([], [], 'b-')
 #plt.xlim([0.0,2])
 '''
 
-plt.ylim([0,numexp/graphlim])
-plt.xlim([0,myxlim ])
+
 done = 0
 Alpha2besaved = np.zeros([len(alphas), 2, histbins] )
 One2besaved = np.zeros([len(alphas), 2, histbins] )
